@@ -14,8 +14,8 @@
     body {
       font-family: sans-serif;
       background: linear-gradient(to bottom right, #001845, #3a0088);
-      overflow: hidden;
       color: #fff;
+      overflow: hidden; /* Hide scrollbars if the canvas extends */
       text-align: center;
       padding: 30px;
     }
@@ -27,10 +27,30 @@
       text-shadow: 2px 2px 8px rgba(255, 255, 255, 0.6);
     }
 
+    /* Containers */
+    #fireworksCanvas, #confettiCanvas {
+      position: fixed;
+      left: 0;
+      top: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: -1; /* Behind everything */
+      pointer-events: none; /* Allows clicks through the canvas */
+    }
+
+    /* Bottom-Right Button Container */
+    .bottom-buttons {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
     button {
-      margin: 20px auto;
-      padding: 15px 30px;
-      font-size: 1rem;
+      padding: 12px 20px;
+      font-size: 0.9rem;
       font-weight: bold;
       background-color: #ffb703;
       color: #000;
@@ -38,6 +58,7 @@
       border-radius: 8px;
       cursor: pointer;
       transition: background-color 0.3s, transform 0.3s;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.4);
     }
 
     button:hover {
@@ -45,20 +66,9 @@
       transform: translateY(-3px);
     }
 
-    /* Canvas takes up the full screen behind the heading/button */
-    #fireworksCanvas {
-      position: fixed;
-      left: 0;
-      top: 0;
-      width: 100vw;
-      height: 100vh;
-      z-index: -1; /* Behind text and button */
-    }
-
-    /* Decorative Footer */
     footer {
       position: fixed;
-      bottom: 10px;
+      bottom: 2px;
       width: 100%;
       text-align: center;
       font-size: 0.8rem;
@@ -68,139 +78,196 @@
 </head>
 <body>
   <h1>Happy New Year!</h1>
-  <button id="launchBtn">Launch Fireworks</button>
 
-  <!-- Fireworks Canvas -->
+  <!-- Fireworks and Confetti Canvases -->
   <canvas id="fireworksCanvas"></canvas>
+  <canvas id="confettiCanvas"></canvas>
+
+  <!-- Button Container -->
+  <div class="bottom-buttons">
+    <button id="fireworksBtn">Launch Fireworks</button>
+    <button id="confettiBtn">Throw Confetti</button>
+  </div>
 
   <footer>
-    Made with ❤️ — Enjoy the celebration!
+    Made with ❤️ by Vi — Celebrate in style!
   </footer>
 
   <script>
-    /* 
-      Simple Fireworks Logic:
-      1. We have a canvas that covers the entire screen.
-      2. When you click "Launch Fireworks," 
-         we start spawning colorful explosions randomly.
-      3. Each explosion has multiple particles that fade out.
-    */
+    /* =================== FIREWORKS SETUP =================== */
+    const fwCanvas = document.getElementById("fireworksCanvas");
+    const fwCtx = fwCanvas.getContext("2d");
+    let fwWidth = window.innerWidth;
+    let fwHeight = window.innerHeight;
+    fwCanvas.width = fwWidth;
+    fwCanvas.height = fwHeight;
 
-    const canvas = document.getElementById("fireworksCanvas");
-    const ctx = canvas.getContext("2d");
-
-    let width = window.innerWidth;
-    let height = window.innerHeight;
-    canvas.width = width;
-    canvas.height = height;
-
-    // Update canvas size on resize
     window.addEventListener("resize", () => {
-      width = window.innerWidth;
-      height = window.innerHeight;
-      canvas.width = width;
-      canvas.height = height;
+      fwWidth = window.innerWidth;
+      fwHeight = window.innerHeight;
+      fwCanvas.width = fwWidth;
+      fwCanvas.height = fwHeight;
     });
 
-    // Array to hold all the fireworks (each is an array of particles)
+    // Fireworks
     let fireworks = [];
+    let fwInterval = null; // Interval reference
 
-    // Particle constructor
-    function Particle(x, y, color) {
+    function fwParticle(x, y, color) {
       this.x = x;
       this.y = y;
       this.color = color;
-      this.size = Math.random() * 3 + 2; // size of particle
-      this.speedX = Math.random() * 6 - 3; // horizontal velocity
-      this.speedY = Math.random() * 6 - 3; // vertical velocity
-      this.alpha = 1; // opacity
+      this.size = Math.random() * 3 + 2;
+      this.speedX = Math.random() * 6 - 3;
+      this.speedY = Math.random() * 6 - 3;
+      this.alpha = 1;
     }
 
-    // Update particle position
-    Particle.prototype.update = function() {
+    fwParticle.prototype.update = function() {
       this.x += this.speedX;
       this.y += this.speedY;
-      this.alpha -= 0.02; // fade out
+      this.alpha -= 0.02;
     };
 
-    // Draw particle
-    Particle.prototype.draw = function() {
-      ctx.save();
-      ctx.globalAlpha = this.alpha;
-      ctx.beginPath();
-      ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-      ctx.fillStyle = this.color;
-      ctx.fill();
-      ctx.restore();
+    fwParticle.prototype.draw = function() {
+      fwCtx.save();
+      fwCtx.globalAlpha = this.alpha;
+      fwCtx.beginPath();
+      fwCtx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+      fwCtx.fillStyle = this.color;
+      fwCtx.fill();
+      fwCtx.restore();
     };
 
-    // Create an explosion (group of particles)
     function createFirework() {
-      const x = Math.random() * width;
-      const y = Math.random() * height * 0.7; 
+      const x = Math.random() * fwWidth;
+      const y = Math.random() * fwHeight * 0.7;
       const colors = [
         "#FF4B3E", "#FFB830", "#EDFF86", 
         "#80FF72", "#9DFEFF", "#FF9FE5", 
         "#FFF740", "#D33F49"
       ];
       const color = colors[Math.floor(Math.random() * colors.length)];
-
-      // Each explosion can have 20-40 particles
       const particleCount = Math.floor(Math.random() * 20) + 20;
       const group = [];
-
       for (let i = 0; i < particleCount; i++) {
-        group.push(new Particle(x, y, color));
+        group.push(new fwParticle(x, y, color));
       }
-
       fireworks.push(group);
     }
 
-    // Animate everything
-    function animate() {
-      ctx.clearRect(0, 0, width, height);
+    function fireworksAnimate() {
+      fwCtx.clearRect(0, 0, fwWidth, fwHeight);
 
-      fireworks.forEach((group, index) => {
-        group.forEach((particle, pIndex) => {
-          particle.update();
-          particle.draw();
-
-          // Remove particles that are fully transparent
-          if (particle.alpha <= 0) {
-            group.splice(pIndex, 1);
-          }
+      fireworks.forEach((group, i) => {
+        group.forEach((p, j) => {
+          p.update();
+          p.draw();
+          if (p.alpha <= 0) group.splice(j, 1);
         });
-        // Remove the group if empty
-        if (group.length === 0) {
-          fireworks.splice(index, 1);
-        }
+        if (group.length === 0) fireworks.splice(i, 1);
       });
+      requestAnimationFrame(fireworksAnimate);
+    }
+    fireworksAnimate();
 
-      requestAnimationFrame(animate);
+    /* =================== CONFETTI SETUP =================== */
+    const cfCanvas = document.getElementById("confettiCanvas");
+    const cfCtx = cfCanvas.getContext("2d");
+    let cfWidth = window.innerWidth;
+    let cfHeight = window.innerHeight;
+    cfCanvas.width = cfWidth;
+    cfCanvas.height = cfHeight;
+
+    window.addEventListener("resize", () => {
+      cfWidth = window.innerWidth;
+      cfHeight = window.innerHeight;
+      cfCanvas.width = cfWidth;
+      cfCanvas.height = cfHeight;
+    });
+
+    let confettiPieces = [];
+    let cfInterval = null; // Interval reference
+
+    // Confetti piece
+    function cfPiece(x, y) {
+      this.x = x;
+      this.y = y;
+      this.size = Math.random() * 10 + 5; 
+      this.color = "hsl(" + Math.random() * 360 + ", 100%, 50%)";
+      this.speedY = Math.random() * 3 + 1; 
+      this.speedX = Math.random() * 2 - 1;
+      this.rotation = Math.random() * 360;
+      this.rotationSpeed = Math.random() * 10 - 5;
     }
 
-    // Start the animation loop
-    animate();
+    cfPiece.prototype.update = function() {
+      this.y += this.speedY;
+      this.x += this.speedX;
+      this.rotation += this.rotationSpeed;
 
-    // Fireworks Interval
-    let fireworkInterval = null;
+      // Re-spawn confetti at top when it goes out of screen
+      if (this.y > cfHeight) {
+        this.y = -10;
+        this.x = Math.random() * cfWidth;
+      }
+    };
 
-    // Button to start fireworks
-    const launchBtn = document.getElementById("launchBtn");
-    launchBtn.addEventListener("click", () => {
-      if (!fireworkInterval) {
-        // Launch fireworks periodically
-        fireworkInterval = setInterval(createFirework, 500);
-        launchBtn.textContent = "Stop Fireworks";
+    cfPiece.prototype.draw = function() {
+      cfCtx.save();
+      cfCtx.translate(this.x, this.y);
+      cfCtx.rotate((this.rotation * Math.PI) / 180);
+      cfCtx.fillStyle = this.color;
+      cfCtx.fillRect(0, 0, this.size, this.size);
+      cfCtx.restore();
+    };
+
+    function createConfetti() {
+      for (let i = 0; i < 10; i++) {
+        const x = Math.random() * cfWidth;
+        const y = -10; 
+        confettiPieces.push(new cfPiece(x, y));
+      }
+    }
+
+    function confettiAnimate() {
+      cfCtx.clearRect(0, 0, cfWidth, cfHeight);
+
+      confettiPieces.forEach((piece) => {
+        piece.update();
+        piece.draw();
+      });
+      requestAnimationFrame(confettiAnimate);
+    }
+    confettiAnimate();
+
+    /* =================== BUTTON HANDLERS =================== */
+
+    // Fireworks Button
+    const fwBtn = document.getElementById("fireworksBtn");
+    fwBtn.addEventListener("click", () => {
+      if (!fwInterval) {
+        fwInterval = setInterval(createFirework, 600);
+        fwBtn.textContent = "Stop Fireworks";
       } else {
-        // Stop fireworks
-        clearInterval(fireworkInterval);
-        fireworkInterval = null;
-        launchBtn.textContent = "Launch Fireworks";
+        clearInterval(fwInterval);
+        fwInterval = null;
+        fwBtn.textContent = "Launch Fireworks";
+      }
+    });
+
+    // Confetti Button
+    const cfBtn = document.getElementById("confettiBtn");
+    cfBtn.addEventListener("click", () => {
+      if (!cfInterval) {
+        cfInterval = setInterval(createConfetti, 300); 
+        cfBtn.textContent = "Stop Confetti";
+      } else {
+        clearInterval(cfInterval);
+        cfInterval = null;
+        cfBtn.textContent = "Throw Confetti";
       }
     });
   </script>
 </body>
 </html>
-
- 
