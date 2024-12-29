@@ -12,19 +12,33 @@
     }
 
     body {
-      font-family: sans-serif;
+      font-family: 'Arial', sans-serif;
       background: linear-gradient(to bottom right, #001845, #3a0088);
       color: #fff;
-      overflow: hidden; /* Hide scrollbars if the canvas extends */
+      overflow: hidden; /* Hide scrollbars */
       text-align: center;
       padding: 30px;
+      perspective: 800px; /* For 3D effect on text */
     }
 
     h1 {
       margin-top: 50px;
-      font-size: 3rem;
-      letter-spacing: 2px;
-      text-shadow: 2px 2px 8px rgba(255, 255, 255, 0.6);
+      font-size: 4rem; /* Increased size */
+      letter-spacing: 5px; /* More spacing */
+      text-shadow: 
+        3px 3px 0px #ffb703,
+        5px 5px 0px #fb8500, /* Multi-color shadow for 3D */
+        6px 6px 10px rgba(0, 0, 0, 0.5);
+      transform: rotateX(10deg); /* Slight rotation for 3D */
+      animation: colorChange 5s infinite; /* Added text color change */
+    }
+
+    @keyframes colorChange {
+      0% { color: #fff; }
+      25% { color: #ffb703; }
+      50% { color: #fb8500; }
+      75% { color: #f72585; }
+      100% { color: #fff; }
     }
 
     /* Containers */
@@ -35,10 +49,33 @@
       width: 100vw;
       height: 100vh;
       z-index: -1; /* Behind everything */
-      pointer-events: none; /* Allows clicks through the canvas */
+      pointer-events: none; /* Allows clicks through */
     }
 
-    /* Bottom-Right Button Container */
+    /* New Year Countdown */
+    #countdown {
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 1.2rem;
+      color: #ffcc5c;
+      z-index: 10;
+      text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.8);
+    }
+
+    /* Interactive Background */
+    #interactive-bg {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -2; /* Behind fireworks and confetti */
+      background: radial-gradient(ellipse at bottom, #1b2735 0%, #090a0f 100%);
+    }
+
+    /* Button Styling */
     .bottom-buttons {
       position: fixed;
       bottom: 20px;
@@ -57,13 +94,38 @@
       border: none;
       border-radius: 8px;
       cursor: pointer;
-      transition: background-color 0.3s, transform 0.3s;
+      transition: background-color 0.3s, transform 0.3s, box-shadow 0.3s;
       box-shadow: 0 4px 8px rgba(0,0,0,0.4);
     }
 
     button:hover {
       background-color: #ffcb77;
-      transform: translateY(-3px);
+      transform: translateY(-3px) scale(1.05);
+      box-shadow: 0 6px 12px rgba(0,0,0,0.6);
+    }
+
+    button:active {
+      transform: translateY(0) scale(1);
+      box-shadow: 0 2px 4px rgba(0,0,0,0.8);
+    }
+
+    /* Audio Controls */
+    #audio-controls {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      z-index: 20;
+    }
+
+    #playPauseBtn {
+      background-color: #f72585; /* Distinct color for music button */
+      color: white;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+    }
+
+    #playPauseBtn:hover {
+      background-color: #e63946; /* Darker shade on hover */
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.7);
     }
 
     footer {
@@ -74,10 +136,40 @@
       font-size: 0.8rem;
       color: #ddd;
     }
+
+    /* Mouse Trail Effect */
+    .mouse-trail {
+      position: absolute;
+      width: 10px;
+      height: 10px;
+      background-color: #ffcc5c;
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 100;
+      opacity: 0.8;
+      transition: opacity 0.2s, transform 0.5s;
+    }
+
+    .mouse-trail.fade-out {
+      opacity: 0;
+      transform: scale(0.2);
+    }
   </style>
 </head>
 <body>
+  <div id="interactive-bg"></div>
   <h1>Happy New Year!</h1>
+
+  <!-- New Year Countdown -->
+  <div id="countdown"></div>
+
+  <!-- Audio Controls -->
+  <div id="audio-controls">
+    <button id="playPauseBtn">Play Music</button>
+  </div>
+  <audio id="bgMusic" loop>
+    <source src="https://audio.jukehost.co.uk/mGZpTkUe5qfvnLh5b3gWnvrYJ63Rdg8g" type="audio/mpeg">
+  </audio>
 
   <!-- Fireworks and Confetti Canvases -->
   <canvas id="fireworksCanvas"></canvas>
@@ -90,10 +182,77 @@
   </div>
 
   <footer>
-    Made with ❤ — Celebrate in style!
+    Made with ❤️
   </footer>
 
   <script>
+    /* =================== AUDIO SETUP =================== */
+    const bgMusic = document.getElementById("bgMusic");
+    const playPauseBtn = document.getElementById("playPauseBtn");
+    let isPlaying = false;
+
+    playPauseBtn.addEventListener("click", () => {
+      if (isPlaying) {
+        bgMusic.pause();
+        playPauseBtn.textContent = "Play Music";
+      } else {
+        bgMusic.play();
+        playPauseBtn.textContent = "Pause Music";
+      }
+      isPlaying = !isPlaying;
+    });
+
+    /* =================== NEW YEAR COUNTDOWN =================== */
+    const countdownDisplay = document.getElementById("countdown");
+
+    function updateCountdown() {
+      const now = new Date();
+      const newYear = new Date(now.getFullYear() + 1, 0, 1);
+      const diff = newYear - now;
+
+      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+      countdownDisplay.textContent = `Time until New Year: ${days}d ${hours}h ${minutes}m ${seconds}s`;
+
+      if (diff <= 0) {
+        countdownDisplay.textContent = "Happy New Year!";
+        clearInterval(countdownInterval);
+      }
+    }
+
+    const countdownInterval = setInterval(updateCountdown, 1000);
+    updateCountdown(); 
+
+    /* =================== INTERACTIVE BACKGROUND =================== */
+    const interactiveBg = document.getElementById("interactive-bg");
+
+    document.addEventListener("mousemove", (event) => {
+      const x = event.clientX / window.innerWidth;
+      const y = event.clientY / window.innerHeight;
+
+      interactiveBg.style.background = `radial-gradient(ellipse at ${x * 100}% ${y * 100}%, #1b2735 0%, #090a0f 100%)`;
+    });
+
+    /* =================== MOUSE TRAIL EFFECT =================== */
+    document.addEventListener("mousemove", (event) => {
+      const trail = document.createElement("div");
+      trail.classList.add("mouse-trail");
+      document.body.appendChild(trail);
+
+      trail.style.left = event.pageX - 5 + "px";
+      trail.style.top = event.pageY - 5 + "px";
+
+      setTimeout(() => {
+        trail.classList.add("fade-out");
+        setTimeout(() => {
+          trail.remove();
+        }, 300);
+      }, 100);
+    });
+
     /* =================== FIREWORKS SETUP =================== */
     const fwCanvas = document.getElementById("fireworksCanvas");
     const fwCtx = fwCanvas.getContext("2d");
