@@ -129,25 +129,6 @@
             box-shadow: 0 2px 4px rgba(0,0,0,0.8);
         }
 
-        /* Audio Controls */
-        #audio-controls {
-            position: fixed;
-            top: 20px;
-            left: 20px;
-            z-index: 20;
-        }
-
-        #playPauseBtn {
-            background-color: #f72585;
-            color: white;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
-        }
-
-        #playPauseBtn:hover {
-            background-color: #e63946;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.7);
-        }
-
         footer {
             position: fixed;
             bottom: 2px;
@@ -213,14 +194,6 @@
     <!-- New Year Countdown -->
     <div id="countdown"></div>
 
-    <!-- Audio Controls -->
-    <div id="audio-controls">
-        <button id="playPauseBtn">Play Music</button>
-    </div>
-    <audio id="bgMusic" loop>
-        <source src="https://audio.jukehost.co.uk/mGZpTkUe5qfvnLh5b3gWnvrYJ63Rdg8g" type="audio/mpeg">
-    </audio>
-
     <!-- Drawing Tools Container -->
     <div class="drawing-tools">
         <input type="color" id="colorPicker" class="color-picker" value="#ff0000">
@@ -242,26 +215,10 @@
     </div>
 
     <footer>
-        Made with ❤️ by Vi — Celebrate in style!
+        Made with ❤️
     </footer>
 
     <script>
-        /* =================== AUDIO SETUP =================== */
-        const bgMusic = document.getElementById("bgMusic");
-        const playPauseBtn = document.getElementById("playPauseBtn");
-        let isPlaying = false;
-
-        playPauseBtn.addEventListener("click", () => {
-            if (isPlaying) {
-                bgMusic.pause();
-                playPauseBtn.textContent = "Play Music";
-            } else {
-                bgMusic.play();
-                playPauseBtn.textContent = "Pause Music";
-            }
-            isPlaying = !isPlaying;
-        });
-
         /* =================== NEW YEAR COUNTDOWN =================== */
         const countdownDisplay = document.getElementById("countdown");
 
@@ -613,6 +570,69 @@
                 clearCanvas();
                 animateSubmittedDrawings();
             }
+        });
+
+        // Function to auto-submit drawing when user stops drawing
+        function autoSubmitDrawing() {
+            if (isDrawing) {
+                stopDrawing(); // Finalize the current drawing path
+
+                if (currentDrawingId) {
+                    // Prepare the drawing for submission
+                    let drawingData = getDrawingData(currentDrawingId);
+                    let drawingIndex = submittedDrawings.findIndex(d => d.id === currentDrawingId);
+
+                    if (drawingIndex === -1) {
+                        // New drawing
+                        submittedDrawings.push({
+                            id: currentDrawingId,
+                            data: drawingData,
+                            x: Math.random() * (drawingCanvas.width - 100),
+                            y: Math.random() * (drawingCanvas.height - 100),
+                            alpha: 1,
+                            speedX: Math.random() * 2 - 1,
+                            speedY: Math.random() * 2 - 1
+                        });
+                    } else {
+                        // Update existing drawing
+                        submittedDrawings[drawingIndex].data = drawingData;
+                        submittedDrawings[drawingIndex].x = Math.random() * (drawingCanvas.width - 100);
+                        submittedDrawings[drawingIndex].y = Math.random() * (drawingCanvas.height - 100);
+                        submittedDrawings[drawingIndex].alpha = 1;
+                        submittedDrawings[drawingIndex].speedX = Math.random() * 2 - 1;
+                        submittedDrawings[drawingIndex].speedY = Math.random() * 2 - 1;
+                    }
+
+                    drawingCounter++;
+
+                    if (drawingCounter >= 3) {
+                        // Limit reached, disable drawing
+                        drawingCanvas.style.pointerEvents = "none";
+                        drawingTools.classList.remove("active");
+                        drawBtn.style.display = "block";
+                        submitDrawingBtn.style.display = "none";
+                    } else {
+                        // Prepare for the next drawing
+                        currentDrawingId = null;
+                    }
+
+                    clearCanvas(); // Clear the canvas for visual feedback
+                    animateSubmittedDrawings(); // Animate all submitted drawings
+                }
+            }
+        }
+
+        // Timer to auto-submit the drawing after a period of inactivity
+        let drawingTimer;
+
+        drawingCanvas.addEventListener("mousemove", () => {
+            clearTimeout(drawingTimer);
+            drawingTimer = setTimeout(autoSubmitDrawing, 2000); // 2 seconds of inactivity
+        });
+
+        drawingCanvas.addEventListener("mouseup", () => {
+            clearTimeout(drawingTimer);
+            drawingTimer = setTimeout(autoSubmitDrawing, 2000); // 2 seconds of inactivity
         });
 
         function animateSubmittedDrawings() {
