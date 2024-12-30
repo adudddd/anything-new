@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8" />
-    <title> New Year Dreams</title>
+    <title>Interactive New Year Dreams</title>
     <style>
         /* Basic Reset */
         * {
@@ -67,7 +67,8 @@
     <div class="tools">
         <input type="color" id="colorPicker" value="#000000">
         <button id="clearCanvas">Clear</button>
-        <button id="saveDrawing">Submit Drawing</button>
+        <button id="drawLine">Line Tool</button>
+        <button id="drawSquare">Square Tool</button>
     </div>
 
     <script>
@@ -76,34 +77,51 @@
         const ctx = canvas.getContext("2d");
         let drawing = false;
         let lastTime = 0;
+        let drawingMode = "line";
 
         // Tools
         const colorPicker = document.getElementById("colorPicker");
         const clearCanvas = document.getElementById("clearCanvas");
-        const saveDrawing = document.getElementById("saveDrawing");
+        const drawLine = document.getElementById("drawLine");
+        const drawSquare = document.getElementById("drawSquare");
         const interactiveArea = document.getElementById("interactive-area");
 
-        // Throttled Drawing Handlers
+        let startX = 0, startY = 0;
+
+        // Drawing Mode Handlers
+        drawLine.addEventListener("click", () => drawingMode = "line");
+        drawSquare.addEventListener("click", () => drawingMode = "square");
+
+        // Start Drawing
         canvas.addEventListener("mousedown", (e) => {
             drawing = true;
-            ctx.beginPath();
-            ctx.moveTo(e.offsetX, e.offsetY);
+            startX = e.offsetX;
+            startY = e.offsetY;
             ctx.strokeStyle = colorPicker.value;
             ctx.lineWidth = 2;
         });
 
+        // Draw
         canvas.addEventListener("mousemove", (e) => {
             const now = Date.now();
             if (drawing && now - lastTime > 16) { // Throttle to ~60 FPS
-                ctx.lineTo(e.offsetX, e.offsetY);
-                ctx.stroke();
+                if (drawingMode === "line") {
+                    ctx.lineTo(e.offsetX, e.offsetY);
+                    ctx.stroke();
+                }
                 lastTime = now;
             }
         });
 
-        canvas.addEventListener("mouseup", () => {
+        // End Drawing
+        canvas.addEventListener("mouseup", (e) => {
+            if (drawingMode === "square" && drawing) {
+                const width = e.offsetX - startX;
+                const height = e.offsetY - startY;
+                ctx.strokeRect(startX, startY, width, height);
+            }
             drawing = false;
-            ctx.closePath();
+            setTimeout(autoSubmitDrawing, 2000); // Auto-submit after 2 seconds
         });
 
         // Clear Canvas
@@ -111,24 +129,33 @@
             ctx.clearRect(0, 0, canvas.width, canvas.height);
         });
 
-        // Submit Drawing
-        saveDrawing.addEventListener("click", () => {
+        // Submit Drawing Functionality
+        let activeDrawings = 0;
+
+        function autoSubmitDrawing() {
+            if (activeDrawings >= 3) return;
+
             const drawingData = canvas.toDataURL("image/png");
             const img = new Image();
             img.src = drawingData;
             img.className = "faded-drawing";
-            img.style.left = `${Math.random() * 80}%`;
-            img.style.top = `${Math.random() * 80}%`;
+            img.style.left = `${Math.random() * (interactiveArea.clientWidth - canvas.width)}px`;
+            img.style.top = `${Math.random() * (interactiveArea.clientHeight - canvas.height)}px`;
             img.onload = () => {
                 interactiveArea.appendChild(img);
+                activeDrawings++;
                 setTimeout(() => {
                     img.style.opacity = 0.05; // Faded effect
+                    setTimeout(() => {
+                        interactiveArea.removeChild(img);
+                        activeDrawings--;
+                    }, 5000);
                 }, 1000);
             };
 
             // Clear Canvas for New Drawing
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-        });
+        }
     </script>
 </body>
 </html>
