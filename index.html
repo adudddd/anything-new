@@ -129,6 +129,28 @@
         .tools button:hover {
             background-color: #ff3399;
         }
+
+        /* Shooting Star */
+        @keyframes shooting {
+            0% {
+                transform: translateX(0) translateY(0) rotate(-45deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translateX(300px) translateY(-300px) rotate(-45deg);
+                opacity: 0;
+            }
+        }
+
+        .shooting-star {
+            position: absolute;
+            width: 100px;
+            height: 3px;
+            background: linear-gradient(to right, white, transparent);
+            animation: shooting 2s linear;
+            pointer-events: auto; /* Allow clicks on shooting star */
+            cursor: pointer;
+        }
     </style>
     <link href="https://fonts.googleapis.com/css2?family=Cedarville+Cursive&family=Dancing+Script&display=swap" rel="stylesheet">
 </head>
@@ -229,24 +251,26 @@
 
         // Event listener to start drawing a star
         canvas.addEventListener("click", (e) => {
-            drawing = true;
-            const x = e.offsetX;
-            const y = e.offsetY;
-            const selectedColor = colorPicker.value;
-
-            drawStar(x, y, selectedColor); // Draw the star
-
-            const dreamLabel = prompt("Enter a dream or wish for this star:");
-            if (dreamLabel) {
-                addDreamText(x, y, dreamLabel);
+            if (!lineDrawingMode) {
+                drawing = true;
+                const x = e.offsetX;
+                const y = e.offsetY;
+                const selectedColor = colorPicker.value;
+    
+                drawStar(x, y, selectedColor); // Draw the star
+    
+                const dreamLabel = prompt("Enter a dream or wish for this star:");
+                if (dreamLabel) {
+                    addDreamText(x, y, dreamLabel);
+                }
             }
         });
 
         // Function to draw a star on the canvas
         function drawStar(x, y, color) {
             const numPoints = 5; // Number of points in the star
-            const outerRadius = 15; // Outer radius of the star
-            const innerRadius = 7; // Inner radius of the star
+            const outerRadius = 10; // Outer radius of the star
+            const innerRadius = 4; // Inner radius of the star
             
             ctx.beginPath();
             ctx.moveTo(x, y - outerRadius);
@@ -304,7 +328,7 @@
                     if (lastStarClicked && lastStarClicked !== clickedStar) {
                         // Draw a line between the stars
                         drawLineBetweenStars(lastStarClicked, clickedStar);
-                        lastStarClicked = null;
+                        lastStarClicked = null; // Reset last clicked star
                     } else {
                         // Store the clicked star
                         lastStarClicked = clickedStar;
@@ -314,11 +338,11 @@
         });
 
         function findClickedStar(x, y) {
-            // Iterate through the stars array and check if the click is within a star's bounds
             for (let i = 0; i < stars.length; i++) {
                 const star = stars[i];
-                const distance = Math.sqrt(Math.pow(star.x - x, 2) + Math.pow(star.y - y, 2));
-                if (distance < 15) {
+                const distance = Math.sqrt((x - star.x) ** 2 + (y - star.y) ** 2);
+                // Check if the click is within the star's radius
+                if (distance <= 10) {
                     return star;
                 }
             }
@@ -326,14 +350,48 @@
         }
 
         function drawLineBetweenStars(star1, star2) {
-            // Draw a line between two stars on the canvas
+            // Draw a glowing line between two stars on the canvas
             ctx.beginPath();
             ctx.moveTo(star1.x, star1.y);
             ctx.lineTo(star2.x, star2.y);
-            ctx.strokeStyle = star1.color;
-            ctx.lineWidth = 2;
+            ctx.strokeStyle = 'white';
+            ctx.lineWidth = 3;
+            ctx.shadowColor = star1.color; // Use the color of the first star for the glow
+            ctx.shadowBlur = 10; // Increase for a more pronounced glow
             ctx.stroke();
+            ctx.closePath();
+            
+            // Reset shadow properties to avoid affecting other drawings
+            ctx.shadowColor = 'transparent';
+            ctx.shadowBlur = 0;
         }
+
+        // Shooting Star Animation
+        function createShootingStar() {
+            const shootingStar = document.createElement('div');
+            shootingStar.className = 'shooting-star';
+            shootingStar.style.left = `${Math.random() * window.innerWidth}px`;
+            shootingStar.style.top = `${Math.random() * window.innerHeight / 2}px`; // Keep it in the upper half
+
+            document.getElementById('interactive-area').appendChild(shootingStar);
+
+            // Allow clicking on the shooting star to make a wish
+            shootingStar.addEventListener('click', () => {
+                const secretWish = prompt("Make a secret wish upon this shooting star!");
+                if (secretWish) {
+                    console.log("Secret wish:", secretWish); // Log the wish (in a real app, you'd store it securely)
+                }
+                shootingStar.remove(); // Remove the shooting star after click
+            });
+
+            // Remove the shooting star after the animation ends
+            setTimeout(() => {
+                shootingStar.remove();
+            }, 2000);
+        }
+
+        // Create a shooting star every 10 seconds (adjust as needed)
+        setInterval(createShootingStar, 10000);
     </script>
 </body>
 </html>
