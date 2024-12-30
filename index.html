@@ -2,182 +2,337 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8" />
-    <title>Interactive New Year Dreams</title>
+    <title>Our Sky of Dreams</title>
     <style>
-        /* Basic Reset */
-        * {
+        /* Styling for the night sky and interactive elements */
+        body {
             margin: 0;
             padding: 0;
-            box-sizing: border-box;
+            background: linear-gradient(to bottom, #19073f, #331e57);
+            font-family: 'Arial', sans-serif;
+            color: #fff;
+            overflow: hidden; /* Prevents scrollbars due to the star field */
         }
 
-        body {
+        .header-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+        }
+
+        #countdown {
             font-family: 'Arial', sans-serif;
-            background: linear-gradient(to bottom right, #001845, #3a0088);
-            color: #fff;
-            text-align: center;
-            padding: 30px;
+            color: #ffcc5c;
+            font-size: 1.2rem;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.8);
         }
 
         h1 {
+            font-family: 'Cedarville Cursive', cursive;
+            text-align: center;
             font-size: 4rem;
-            margin-bottom: 20px;
-            text-shadow: 3px 3px 0px #ffb703, 5px 5px 0px #fb8500;
+            margin-bottom: 30px;
+            text-shadow: 0 0 10px #fff, 0 0 20px #fff, 0 0 30px #e60073, 0 0 40px #e60073;
         }
 
+        /* The container for the star field and drawing area */
+        #interactive-area {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            z-index: 1;
+            overflow: hidden; /* Hide overflow to prevent scrollbars */
+        }
+
+        #star-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Drawing Canvas */
         #drawingCanvas {
-            border: 2px solid #fff;
-            background: #fff;
-            display: block;
-            margin: 20px auto;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            cursor: crosshair; /* Make it clear this is a drawing area */
+            z-index: 10; /* Ensure the drawing canvas is above the star field */
+        }
+
+        /* The Dream text */
+        .dream-text {
+            position: absolute;
+            font-family: 'Dancing Script', cursive;
+            font-size: 1.5rem;
+            color: #ffd700; /* A golden color for the dreams */
+            text-shadow: 0 0 5px #fff;
+            z-index: 20;
+        }
+
+        .color-picker {
+          -webkit-appearance: none;
+          -moz-appearance: none;
+          appearance: none;
+          width: 40px;
+          height: 40px;
+          border: 2px solid #fff;
+          border-radius: 8px;
+          cursor: pointer;
+          background-color: transparent;
+          padding: 0;
+          box-shadow: 0 2px 5px rgba(0, 0, 0, 0.4);
+          margin: 0 5px;
+        }
+
+        .color-picker::-webkit-color-swatch-wrapper {
+          padding: 0;
+        }
+
+        .color-picker::-webkit-color-swatch {
+          border: none;
+          border-radius: 6px;
+        }
+
+        .color-picker::-moz-color-swatch {
+          border: none;
+          border-radius: 6px;
         }
 
         .tools {
-            margin-top: 20px;
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            display: flex;
+            align-items: center;
+            z-index: 30;
         }
 
-        .tools button, .tools input {
-            padding: 10px;
-            font-size: 1rem;
-            margin: 5px;
+        /* Tool Buttons */
+        .tools button {
+            padding: 10px 20px;
+            margin: 0 5px;
+            border: none;
+            background-color: #e60073; /* Pink color for tools */
+            color: #fff;
+            font-weight: bold;
             cursor: pointer;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+            transition: background-color 0.3s ease;
         }
 
-        #interactive-area {
-            position: relative;
-            width: 100%;
-            height: 100vh;
-            overflow: hidden;
-        }
-
-        .faded-drawing {
-            position: absolute;
-            opacity: 0.2;
-            transition: opacity 5s; /* Transition for the opacity */
+        .tools button:hover {
+            background-color: #ff3399;
         }
     </style>
+    <link href="https://fonts.googleapis.com/css2?family=Cedarville+Cursive&family=Dancing+Script&display=swap" rel="stylesheet">
 </head>
 <body>
-    <h1>Interactive New Year Dreams</h1>
-
-    <div id="interactive-area">
-        <canvas id="drawingCanvas" width="800" height="600"></canvas>
+    <div class="header-container">
+        <div id="countdown"></div>
+        <h1>Our Sky of Dreams</h1>
     </div>
 
+    <!-- Interactive area for drawing -->
+    <div id="interactive-area">
+        <canvas id="star-canvas"></canvas>
+        <canvas id="drawingCanvas"></canvas>
+    </div>
+
+    <!-- Tools for drawing -->
     <div class="tools">
-        <input type="color" id="colorPicker" value="#000000">
-        <button id="clearCanvas">Clear</button>
-        <button id="drawLine">Line Tool</button>
-        <button id="drawSquare">Square Tool</button>
+        <input type="color" id="colorPicker" class="color-picker" value="#ffb6c1">
+        <button id="drawLine">Connect Stars</button>
     </div>
 
     <script>
-        // Canvas Setup
+    // New Year Countdown Timer
+        const countdownDisplay = document.getElementById("countdown");
+
+        function updateCountdown() {
+            const now = new Date();
+            const newYear = new Date(now.getFullYear() + 1, 0, 1);
+            const diff = newYear - now;
+
+            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+            countdownDisplay.textContent = `Time until New Year: ${days}d ${hours}h ${minutes}m ${seconds}s`;
+
+            if (diff <= 0) {
+                countdownDisplay.textContent = "Happy New Year!";
+                clearInterval(countdownInterval);
+            }
+        }
+
+        const countdownInterval = setInterval(updateCountdown, 1000);
+        updateCountdown();
+
+        // Function to create a star element
+        function createStar(x, y, color) {
+            const star = document.createElement('div');
+            star.style.position = 'absolute';
+            star.style.left = `${x}px`;
+            star.style.top = `${y}px`;
+            star.style.width = '2px';
+            star.style.height = '2px';
+            star.style.backgroundColor = color;
+            star.style.boxShadow = `0 0 10px ${color}`;
+            star.style.borderRadius = '50%';
+            star.style.opacity = Math.random() * 0.5 + 0.5;
+            document.getElementById('interactive-area').appendChild(star);
+        }
+
+        // Generate random stars on the canvas
+        function generateStars(numStars) {
+            const canvas = document.getElementById('star-canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            for (let i = 0; i < numStars; i++) {
+                const x = Math.random() * canvas.width;
+                const y = Math.random() * canvas.height;
+                const radius = Math.random() * 1.5;
+                const color = '#FFFFFF';
+
+                ctx.beginPath();
+                ctx.arc(x, y, radius, 0, Math.PI * 2, false);
+                ctx.fillStyle = color;
+                ctx.shadowColor = color;
+                ctx.shadowBlur = Math.random() * 10;
+                ctx.fill();
+            }
+        }
+
+        // Initialize the stars
+        generateStars(100);
+
+        // Canvas for drawing
         const canvas = document.getElementById("drawingCanvas");
         const ctx = canvas.getContext("2d");
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
         let drawing = false;
-        let lastTime = 0;
-        let drawingMode = "line";
+        let stars = []; // Array to store star objects
 
-        // Tools
+        // Get the selected color from the color picker
         const colorPicker = document.getElementById("colorPicker");
-        const clearCanvas = document.getElementById("clearCanvas");
-        const drawLine = document.getElementById("drawLine");
-        const drawSquare = document.getElementById("drawSquare");
-        const interactiveArea = document.getElementById("interactive-area");
 
-        let startX = 0, startY = 0;
-
-        // Drawing Mode Handlers
-        drawLine.addEventListener("click", () => drawingMode = "line");
-        drawSquare.addEventListener("click", () => drawingMode = "square");
-
-        // Drawing timer
-        let drawingTimer;
-
-        // Start Drawing
-        canvas.addEventListener("mousedown", (e) => {
+        // Event listener to start drawing a star
+        canvas.addEventListener("click", (e) => {
             drawing = true;
-            startX = e.offsetX;
-            startY = e.offsetY;
-            ctx.strokeStyle = colorPicker.value;
-            ctx.lineWidth = 2;
+            const x = e.offsetX;
+            const y = e.offsetY;
+            const selectedColor = colorPicker.value;
 
-            if (drawingMode === "line") {
-                ctx.beginPath(); // Start a new path for the line
-                ctx.moveTo(startX, startY);
+            drawStar(x, y, selectedColor); // Draw the star
+
+            const dreamLabel = prompt("Enter a dream or wish for this star:");
+            if (dreamLabel) {
+                addDreamText(x, y, dreamLabel);
             }
-
-            // Reset the auto-submit timer on new mousedown
-            clearTimeout(drawingTimer);
-            drawingTimer = setTimeout(autoSubmitDrawing, 2000);
         });
 
-        // Draw
-        canvas.addEventListener("mousemove", (e) => {
-            const now = Date.now();
-            if (drawing && now - lastTime > 16) {
-                if (drawingMode === "line") {
-                    ctx.lineTo(e.offsetX, e.offsetY);
-                    ctx.stroke();
+        // Function to draw a star on the canvas
+        function drawStar(x, y, color) {
+            const numPoints = 5; // Number of points in the star
+            const outerRadius = 15; // Outer radius of the star
+            const innerRadius = 7; // Inner radius of the star
+            
+            ctx.beginPath();
+            ctx.moveTo(x, y - outerRadius);
+
+            for (let i = 0; i < numPoints * 2; i++) {
+                const radius = i % 2 === 0 ? outerRadius : innerRadius;
+                const angle = (i * Math.PI) / numPoints;
+                const pointX = x + radius * Math.sin(angle);
+                const pointY = y - radius * Math.cos(angle);
+                ctx.lineTo(pointX, pointY);
+            }
+
+            ctx.closePath();
+            ctx.fillStyle = color;
+            ctx.shadowColor = color;
+            ctx.shadowBlur = 10;
+            ctx.fill();
+
+            // Store the star's position and color
+            stars.push({ x, y, color });
+        }
+
+        // Function to add dream text next to a star
+        function addDreamText(x, y, text) {
+            const dreamText = document.createElement("div");
+            dreamText.className = "dream-text";
+            dreamText.style.left = `${x + 20}px`;
+            dreamText.style.top = `${y - 10}px`;
+            dreamText.textContent = text;
+            document.getElementById("interactive-area").appendChild(dreamText);
+        }
+
+        // Draw Line Tool Logic
+        let lineDrawingMode = false;
+        let lastStarClicked = null;
+
+        const drawLineButton = document.getElementById("drawLine");
+        drawLineButton.addEventListener("click", () => {
+            lineDrawingMode = !lineDrawingMode;
+            if (lineDrawingMode) {
+                drawLineButton.style.backgroundColor = "#ff3399";
+                drawLineButton.textContent = "Connecting...";
+            } else {
+                drawLineButton.style.backgroundColor = "#e60073";
+                drawLineButton.textContent = "Connect Stars";
+                lastStarClicked = null;
+            }
+            canvas.style.cursor = lineDrawingMode ? "crosshair" : "default";
+        });
+
+        canvas.addEventListener("click", (e) => {
+            if (lineDrawingMode) {
+                const clickedStar = findClickedStar(e.offsetX, e.offsetY);
+                if (clickedStar) {
+                    if (lastStarClicked && lastStarClicked !== clickedStar) {
+                        // Draw a line between the stars
+                        drawLineBetweenStars(lastStarClicked, clickedStar);
+                        lastStarClicked = null;
+                    } else {
+                        // Store the clicked star
+                        lastStarClicked = clickedStar;
+                    }
                 }
-
-                lastTime = now;
-
-                // Reset the auto-submit timer if still drawing
-                clearTimeout(drawingTimer);
-                drawingTimer = setTimeout(autoSubmitDrawing, 2000);
             }
         });
 
-        // End Drawing
-        canvas.addEventListener("mouseup", (e) => {
-            if (drawingMode === "square" && drawing) {
-                const width = e.offsetX - startX;
-                const height = e.offsetY - startY;
-                ctx.strokeRect(startX, startY, width, height);
+        function findClickedStar(x, y) {
+            // Iterate through the stars array and check if the click is within a star's bounds
+            for (let i = 0; i < stars.length; i++) {
+                const star = stars[i];
+                const distance = Math.sqrt(Math.pow(star.x - x, 2) + Math.pow(star.y - y, 2));
+                if (distance < 15) {
+                    return star;
+                }
             }
-            drawing = false;
-        });
+            return null;
+        }
 
-        // Clear Canvas
-        clearCanvas.addEventListener("click", () => {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-        });
-
-        // Submit Drawing Functionality
-        let activeDrawings = 0;
-        let drawingData = [];
-
-        // Auto-submit the drawing to the interactive area
-        function autoSubmitDrawing() {
-            if (drawingData.length === 0 || activeDrawings >= 3) {
-                return;
-            }
-
-            const img = new Image();
-            img.src = canvas.toDataURL("image/png");
-            img.className = "faded-drawing";
-            img.style.left = `${Math.random() * (interactiveArea.clientWidth - canvas.width)}px`;
-            img.style.top = `${Math.random() * (interactiveArea.clientHeight - canvas.height)}px`;
-            img.onload = () => {
-                interactiveArea.appendChild(img);
-                activeDrawings++;
-
-                // Remove after some time
-                setTimeout(() => {
-                    img.style.opacity = 0;
-                    setTimeout(() => {
-                        if (img.parentNode) {
-                            img.parentNode.removeChild(img);
-                        }
-                        activeDrawings--;
-                    }, 5000);
-                }, 1000);
-            };
-
-            drawingData = [];
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        function drawLineBetweenStars(star1, star2) {
+            // Draw a line between two stars on the canvas
+            ctx.beginPath();
+            ctx.moveTo(star1.x, star1.y);
+            ctx.lineTo(star2.x, star2.y);
+            ctx.strokeStyle = star1.color;
+            ctx.lineWidth = 2;
+            ctx.stroke();
         }
     </script>
 </body>
