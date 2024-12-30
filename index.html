@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8" />
-    <title>Happy New Year!</title>
+    <title>Happy New Year Dream Diary</title>
     <style>
         /* Basic Reset */
         * {
@@ -15,688 +15,114 @@
             font-family: 'Arial', sans-serif;
             background: linear-gradient(to bottom right, #001845, #3a0088);
             color: #fff;
-            overflow: hidden;
             text-align: center;
             padding: 30px;
-            perspective: 800px;
         }
 
         h1 {
-            margin-top: 50px;
             font-size: 4rem;
-            letter-spacing: 5px;
-            text-shadow:
-                3px 3px 0px #ffb703,
-                5px 5px 0px #fb8500,
-                6px 6px 10px rgba(0, 0, 0, 0.5);
-            transform: rotateX(10deg);
-            animation: colorChange 5s infinite;
+            margin-bottom: 20px;
+            text-shadow: 3px 3px 0px #ffb703, 5px 5px 0px #fb8500;
         }
 
-        @keyframes colorChange {
-            0% { color: #fff; }
-            25% { color: #ffb703; }
-            50% { color: #fb8500; }
-            75% { color: #f72585; }
-            100% { color: #fff; }
-        }
-
-        /* Containers */
-        #fireworksCanvas, #confettiCanvas, #drawingCanvas {
-            position: fixed;
-            left: 0;
-            top: 0;
-            width: 100vw;
-            height: 100vh;
-            pointer-events: none;
-        }
-
-        #fireworksCanvas, #confettiCanvas {
-            z-index: -1;
-        }
-
-        /* Drawing Canvas Specifics */
-        #drawingCanvas {
-            z-index: 15; /* Ensure it's above other elements but below controls */
-        }
-
-        /* New Year Countdown */
-        #countdown {
-            position: fixed;
-            top: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            font-size: 1.2rem;
-            color: #ffcc5c;
-            z-index: 10;
-            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.8);
-        }
-
-        /* Interactive Background */
-        #interactive-bg {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: -2;
-            background: radial-gradient(ellipse at bottom, #1b2735 0%, #090a0f 100%);
-        }
-
-        /* Button Styling */
-        .bottom-buttons, .drawing-tools {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        /* Drawing Tools Container */
-        .drawing-tools {
-            bottom: 130px;
-            right: 20px;
-            z-index: 30; /* Above the drawing canvas */
-            display: none; /* Hidden by default */
-        }
-
-        .drawing-tools.active {
-            display: flex;
-        }
-
-        button {
-            padding: 12px 20px;
-            font-size: 0.9rem;
-            font-weight: bold;
-            background-color: #ffb703;
-            color: #000;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: background-color 0.3s, transform 0.3s, box-shadow 0.3s;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.4);
-        }
-
-        button:hover {
-            background-color: #ffcb77;
-            transform: translateY(-3px) scale(1.05);
-            box-shadow: 0 6px 12px rgba(0,0,0,0.6);
-        }
-
-        button:active {
-            transform: translateY(0) scale(1);
-            box-shadow: 0 2px 4px rgba(0,0,0,0.8);
-        }
-
-        footer {
-            position: fixed;
-            bottom: 2px;
-            width: 100%;
-            text-align: center;
-            font-size: 0.8rem;
-            color: #ddd;
-        }
-
-        /* Mouse Trail Effect */
-        .mouse-trail {
-            position: absolute;
-            width: 10px;
-            height: 10px;
-            background-color: #ffcc5c;
-            border-radius: 50%;
-            pointer-events: none;
-            z-index: 100;
-            opacity: 0.8;
-            transition: opacity 0.2s, transform 0.5s;
-        }
-
-        .mouse-trail.fade-out {
-            opacity: 0;
-            transform: scale(0.2);
-        }
-
-        /* Color Picker and Drawing Tool Buttons */
-        .color-picker {
-            -webkit-appearance: none;
-            -moz-appearance: none;
-            appearance: none;
-            width: 50px;
-            height: 50px;
+        canvas {
             border: 2px solid #fff;
-            border-radius: 8px;
+            background: #fff;
+            display: block;
+            margin: 20px auto;
+        }
+
+        .tools {
+            margin-top: 20px;
+        }
+
+        .tools button, .tools input {
+            padding: 10px;
+            font-size: 1rem;
+            margin: 5px;
             cursor: pointer;
-            background-color: transparent;
-            padding: 0;
-            margin-bottom: 10px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.4);
         }
 
-        .color-picker::-webkit-color-swatch-wrapper {
-            padding: 0;
+        .notes {
+            margin-top: 20px;
+            font-size: 1rem;
         }
 
-        .color-picker::-webkit-color-swatch {
-            border: none;
-            border-radius: 6px;
-        }
-
-        .color-picker::-moz-color-swatch {
-            border: none;
-            border-radius: 6px;
+        .notes textarea {
+            width: 80%;
+            height: 100px;
+            margin-top: 10px;
+            font-size: 1rem;
+            padding: 10px;
         }
     </style>
 </head>
 <body>
-    <div id="interactive-bg"></div>
-    <h1>Happy New Year!</h1>
+    <h1>Happy New Year Dream Diary</h1>
 
-    <!-- New Year Countdown -->
-    <div id="countdown"></div>
+    <canvas id="drawingCanvas" width="800" height="600"></canvas>
 
-    <!-- Drawing Tools Container -->
-    <div class="drawing-tools">
-        <input type="color" id="colorPicker" class="color-picker" value="#ff0000">
-        <button id="lineTool">Line</button>
-        <button id="squareTool">Square</button>
-        <button id="submitDrawing">Submit</button>
+    <div class="tools">
+        <input type="color" id="colorPicker" value="#000000">
+        <button id="clearCanvas">Clear</button>
+        <button id="saveNote">Add Note</button>
     </div>
 
-    <!-- Fireworks, Confetti and Drawing Canvases -->
-    <canvas id="fireworksCanvas"></canvas>
-    <canvas id="confettiCanvas"></canvas>
-    <canvas id="drawingCanvas"></canvas>
-
-    <!-- Button Container -->
-    <div class="bottom-buttons">
-        <button id="fireworksBtn">Launch Fireworks</button>
-        <button id="confettiBtn">Throw Confetti</button>
-        <button id="drawBtn">Draw Your Dream for this Year</button>
+    <div class="notes">
+        <label for="noteInput">Write a note for your dream:</label><br>
+        <textarea id="noteInput" placeholder="Write your thoughts here..."></textarea>
+        <p id="savedNote"></p>
     </div>
-
-    <footer>
-        Made with ❤️
-    </footer>
 
     <script>
-        /* =================== NEW YEAR COUNTDOWN =================== */
-        const countdownDisplay = document.getElementById("countdown");
+        // Drawing Canvas Setup
+        const canvas = document.getElementById("drawingCanvas");
+        const ctx = canvas.getContext("2d");
+        let drawing = false;
 
-        function updateCountdown() {
-            const now = new Date();
-            const newYear = new Date(now.getFullYear() + 1, 0, 1);
-            const diff = newYear - now;
-
-            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-            const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-            const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-            const seconds = Math.floor((diff % (1000 * 60)) / 1000);
-
-            countdownDisplay.textContent = `Time until New Year: ${days}d ${hours}h ${minutes}m ${seconds}s`;
-
-            if (diff <= 0) {
-                countdownDisplay.textContent = "Happy New Year!";
-                clearInterval(countdownInterval);
-            }
-        }
-
-        const countdownInterval = setInterval(updateCountdown, 1000);
-        updateCountdown(); 
-
-        /* =================== INTERACTIVE BACKGROUND =================== */
-        const interactiveBg = document.getElementById("interactive-bg");
-
-        document.addEventListener("mousemove", (event) => {
-            const x = event.clientX / window.innerWidth;
-            const y = event.clientY / window.innerHeight;
-
-            interactiveBg.style.background = `radial-gradient(ellipse at ${x * 100}% ${y * 100}%, #1b2735 0%, #090a0f 100%)`;
-        });
-
-        /* =================== MOUSE TRAIL EFFECT =================== */
-        document.addEventListener("mousemove", (event) => {
-            const trail = document.createElement("div");
-            trail.classList.add("mouse-trail");
-            document.body.appendChild(trail);
-
-            trail.style.left = event.pageX - 5 + "px";
-            trail.style.top = event.pageY - 5 + "px";
-
-            setTimeout(() => {
-                trail.classList.add("fade-out");
-                setTimeout(() => {
-                    trail.remove();
-                }, 300);
-            }, 100);
-        });
-
-        /* =================== FIREWORKS SETUP =================== */
-        const fwCanvas = document.getElementById("fireworksCanvas");
-        const fwCtx = fwCanvas.getContext("2d");
-        let fwWidth = window.innerWidth;
-        let fwHeight = window.innerHeight;
-        fwCanvas.width = fwWidth;
-        fwCanvas.height = fwHeight;
-
-        window.addEventListener("resize", () => {
-            fwWidth = window.innerWidth;
-            fwHeight = window.innerHeight;
-            fwCanvas.width = fwWidth;
-            fwCanvas.height = fwHeight;
-        });
-
-        let fireworks = [];
-        let fwInterval = null;
-
-        function fwParticle(x, y, color) {
-            this.x = x;
-            this.y = y;
-            this.color = color;
-            this.size = Math.random() * 3 + 2;
-            this.speedX = Math.random() * 6 - 3;
-            this.speedY = Math.random() * 6 - 3;
-            this.alpha = 1;
-        }
-
-        fwParticle.prototype.update = function() {
-            this.x += this.speedX;
-            this.y += this.speedY;
-            this.alpha -= 0.02;
-        };
-
-        fwParticle.prototype.draw = function() {
-            fwCtx.save();
-            fwCtx.globalAlpha = this.alpha;
-            fwCtx.beginPath();
-            fwCtx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-            fwCtx.fillStyle = this.color;
-            fwCtx.fill();
-            fwCtx.restore();
-        };
-
-        function createFirework() {
-            const x = Math.random() * fwWidth;
-            const y = Math.random() * fwHeight * 0.7;
-            const colors = [
-                "#FF4B3E", "#FFB830", "#EDFF86", 
-                "#80FF72", "#9DFEFF", "#FF9FE5", 
-                "#FFF740", "#D33F49"
-            ];
-            const color = colors[Math.floor(Math.random() * colors.length)];
-            const particleCount = Math.floor(Math.random() * 20) + 20;
-            const group = [];
-            for (let i = 0; i < particleCount; i++) {
-                group.push(new fwParticle(x, y, color));
-            }
-            fireworks.push(group);
-        }
-
-        function fireworksAnimate() {
-            fwCtx.clearRect(0, 0, fwWidth, fwHeight);
-
-            fireworks.forEach((group, i) => {
-                group.forEach((p, j) => {
-                    p.update();
-                    p.draw();
-                    if (p.alpha <= 0) group.splice(j, 1);
-                });
-                if (group.length === 0) fireworks.splice(i, 1);
-            });
-
-            requestAnimationFrame(fireworksAnimate);
-        }
-
-        fireworksAnimate();
-
-        /* =================== CONFETTI SETUP =================== */
-        const cfCanvas = document.getElementById("confettiCanvas");
-        const cfCtx = cfCanvas.getContext("2d");
-        let cfWidth = window.innerWidth;
-        let cfHeight = window.innerHeight;
-        cfCanvas.width = cfWidth;
-        cfCanvas.height = cfHeight;
-
-        window.addEventListener("resize", () => {
-            cfWidth = window.innerWidth;
-            cfHeight = window.innerHeight;
-            cfCanvas.width = cfWidth;
-            cfCanvas.height = cfHeight;
-        });
-
-        let confettiPieces = [];
-        let cfInterval = null;
-
-        function cfPiece(x, y) {
-            this.x = x;
-            this.y = y;
-            this.size = Math.random() * 10 + 5; 
-            this.color = "hsl(" + Math.random() * 360 + ", 100%, 50%)";
-            this.speedY = Math.random() * 3 + 1; 
-            this.speedX = Math.random() * 2 - 1;
-            this.rotation = Math.random() * 360;
-            this.rotationSpeed = Math.random() * 10 - 5;
-        }
-
-        cfPiece.prototype.update = function() {
-            this.y += this.speedY;
-            this.x += this.speedX;
-            this.rotation += this.rotationSpeed;
-
-            if (this.y > cfHeight) {
-                this.y = -10;
-                this.x = Math.random() * cfWidth;
-            }
-        };
-
-        cfPiece.prototype.draw = function() {
-            cfCtx.save();
-            cfCtx.translate(this.x, this.y);
-            cfCtx.rotate((this.rotation * Math.PI) / 180);
-            cfCtx.fillStyle = this.color;
-            cfCtx.fillRect(0, 0, this.size, this.size);
-            cfCtx.restore();
-        };
-
-        function createConfetti() {
-            for (let i = 0; i < 10; i++) {
-                const x = Math.random() * cfWidth;
-                const y = -10; 
-                confettiPieces.push(new cfPiece(x, y));
-            }
-        }
-
-        function confettiAnimate() {
-            cfCtx.clearRect(0, 0, cfWidth, cfHeight);
-
-            confettiPieces.forEach((piece) => {
-                piece.update();
-                piece.draw();
-            });
-
-            requestAnimationFrame(confettiAnimate);
-        }
-
-        confettiAnimate();
-
-        /* =================== DRAWING FUNCTIONALITY =================== */
-        const drawBtn = document.getElementById("drawBtn");
-        const drawingTools = document.querySelector(".drawing-tools");
-        const lineToolBtn = document.getElementById("lineTool");
-        const squareToolBtn = document.getElementById("squareTool");
-        const submitDrawingBtn = document.getElementById("submitDrawing");
+        // Tool Elements
         const colorPicker = document.getElementById("colorPicker");
-        const drawingCanvas = document.getElementById("drawingCanvas");
-        const drawCtx = drawingCanvas.getContext("2d");
+        const clearCanvas = document.getElementById("clearCanvas");
+        const saveNote = document.getElementById("saveNote");
+        const noteInput = document.getElementById("noteInput");
+        const savedNote = document.getElementById("savedNote");
 
-        let isDrawing = false;
-        let drawingMode = "line";
-        let startX, startY;
-        let drawingCounter = 0;
-        let submittedDrawings = [];
-
-        drawingCanvas.width = window.innerWidth;
-        drawingCanvas.height = window.innerHeight;
-
-        lineToolBtn.addEventListener("click", () => drawingMode = "line");
-        squareToolBtn.addEventListener("click", () => drawingMode = "square");
-
-        drawBtn.addEventListener("click", () => {
-            drawingTools.classList.add("active");
-            drawingCanvas.style.pointerEvents = "auto";
-            drawBtn.style.display = "none"; // Hide "Draw Your Dream" button once activated
+        // Start Drawing
+        canvas.addEventListener("mousedown", (e) => {
+            drawing = true;
+            ctx.beginPath();
+            ctx.moveTo(e.offsetX, e.offsetY);
+            ctx.strokeStyle = colorPicker.value;
+            ctx.lineWidth = 2;
         });
 
-        drawingCanvas.addEventListener("mousedown", startDrawing);
-        drawingCanvas.addEventListener("mousemove", draw);
-        drawingCanvas.addEventListener("mouseup", stopDrawing);
-        drawingCanvas.addEventListener("mouseout", stopDrawing);
-
-        function startDrawing(e) {
-            if (drawingTools.classList.contains("active")) {
-                isDrawing = true;
-                startX = e.clientX - drawingCanvas.offsetLeft;
-                startY = e.clientY - drawingCanvas.offsetTop;
-                drawCtx.beginPath();
-                drawCtx.moveTo(startX, startY);
-                drawCtx.strokeStyle = colorPicker.value;
-                drawCtx.lineWidth = 3;
-            }
-        }
-
-        function draw(e) {
-            if (!isDrawing) return;
-
-            const x = e.clientX - drawingCanvas.offsetLeft;
-            const y = e.clientY - drawingCanvas.offsetTop;
-
-            if (drawingMode === "line") {
-                drawLine(x, y);
-            } else if (drawingMode === "square") {
-                drawCtx.clearRect(0, 0, drawingCanvas.width, drawingCanvas.height);
-                submittedDrawings.forEach(drawing => {
-                    if (drawing.id === currentDrawingId) {
-                        reDraw(drawing.data);
-                    }
-                });
-                drawSquare(startX, startY, x, y);
-            }
-        }
-
-        let currentDrawingId = null;
-
-        function stopDrawing() {
-            if (isDrawing) {
-                isDrawing = false;
-                drawCtx.closePath();
-
-                if (!currentDrawingId) {
-                    currentDrawingId = Date.now();
-                }
-
-                let drawingData = getDrawingData(currentDrawingId);
-
-                let existingDrawingIndex = submittedDrawings.findIndex(d => d.id === currentDrawingId);
-                if (existingDrawingIndex > -1) {
-                    submittedDrawings[existingDrawingIndex] = {
-                        id: currentDrawingId,
-                        data: drawingData
-                    };
-                } else {
-                    submittedDrawings.push({
-                        id: currentDrawingId,
-                        data: drawingData
-                    });
-                }
-            }
-        }
-
-        function getDrawingData(drawingId) {
-            const imgData = drawCtx.getImageData(0, 0, drawingCanvas.width, drawingCanvas.height);
-            return {
-                image: imgData,
-                id: drawingId
-            };
-        }
-
-        function drawLine(x, y) {
-            drawCtx.lineTo(x, y);
-            drawCtx.stroke();
-        }
-
-        function drawSquare(x1, y1, x2, y2) {
-            const side = Math.max(Math.abs(x2 - x1), Math.abs(y2 - y1));
-            const centerX = x1 + (x2 > x1 ? side / 2 : -side / 2);
-            const centerY = y1 + (y2 > y1 ? side / 2 : -side / 2);
-
-            drawCtx.beginPath();
-            drawCtx.rect(centerX - side / 2, centerY - side / 2, side, side);
-            drawCtx.strokeStyle = colorPicker.value;
-            drawCtx.lineWidth = 3;
-            drawCtx.stroke();
-            drawCtx.closePath();
-        }
-
-        function reDraw(drawingData) {
-            drawCtx.putImageData(drawingData.image, 0, 0);
-        }
-
-        function clearCanvas() {
-            drawCtx.clearRect(0, 0, drawingCanvas.width, drawingCanvas.height);
-            currentDrawingId = null;
-        }
-
-        submitDrawingBtn.addEventListener("click", () => {
-            if (currentDrawingId) {
-                let lastDrawingData = getDrawingData(currentDrawingId);
-                let lastDrawingIndex = submittedDrawings.findIndex(d => d.id === currentDrawingId);
-                submittedDrawings[lastDrawingIndex].data = lastDrawingData;
-
-                submittedDrawings[lastDrawingIndex].x = Math.random() * (drawingCanvas.width - 100);
-                submittedDrawings[lastDrawingIndex].y = Math.random() * (drawingCanvas.height - 100);
-                submittedDrawings[lastDrawingIndex].alpha = 1;
-                submittedDrawings[lastDrawingIndex].speedX = Math.random() * 2 - 1;
-                submittedDrawings[lastDrawingIndex].speedY = Math.random() * 2 - 1;
-
-                drawingCounter++;
-
-                if (drawingCounter >= 3) {
-                    drawingCanvas.style.pointerEvents = "none";
-                    drawingTools.classList.remove("active");
-                    submitDrawingBtn.style.display = "none"; // Optionally hide submit button
-                } else {
-                    currentDrawingId = null; // Prepare for new drawing
-                }
-
-                clearCanvas();
-                animateSubmittedDrawings();
+        // Draw
+        canvas.addEventListener("mousemove", (e) => {
+            if (drawing) {
+                ctx.lineTo(e.offsetX, e.offsetY);
+                ctx.stroke();
             }
         });
 
-        // Function to auto-submit drawing when user stops drawing
-        function autoSubmitDrawing() {
-            if (isDrawing) {
-                stopDrawing(); // Finalize the current drawing path
-
-                if (currentDrawingId) {
-                    // Prepare the drawing for submission
-                    let drawingData = getDrawingData(currentDrawingId);
-                    let drawingIndex = submittedDrawings.findIndex(d => d.id === currentDrawingId);
-
-                    if (drawingIndex === -1) {
-                        // New drawing
-                        submittedDrawings.push({
-                            id: currentDrawingId,
-                            data: drawingData,
-                            x: Math.random() * (drawingCanvas.width - 100),
-                            y: Math.random() * (drawingCanvas.height - 100),
-                            alpha: 1,
-                            speedX: Math.random() * 2 - 1,
-                            speedY: Math.random() * 2 - 1
-                        });
-                    } else {
-                        // Update existing drawing
-                        submittedDrawings[drawingIndex].data = drawingData;
-                        submittedDrawings[drawingIndex].x = Math.random() * (drawingCanvas.width - 100);
-                        submittedDrawings[drawingIndex].y = Math.random() * (drawingCanvas.height - 100);
-                        submittedDrawings[drawingIndex].alpha = 1;
-                        submittedDrawings[drawingIndex].speedX = Math.random() * 2 - 1;
-                        submittedDrawings[drawingIndex].speedY = Math.random() * 2 - 1;
-                    }
-
-                    drawingCounter++;
-
-                    if (drawingCounter >= 3) {
-                        // Limit reached, disable drawing
-                        drawingCanvas.style.pointerEvents = "none";
-                        drawingTools.classList.remove("active");
-                        drawBtn.style.display = "block";
-                        submitDrawingBtn.style.display = "none";
-                    } else {
-                        // Prepare for the next drawing
-                        currentDrawingId = null;
-                    }
-
-                    clearCanvas(); // Clear the canvas for visual feedback
-                    animateSubmittedDrawings(); // Animate all submitted drawings
-                }
-            }
-        }
-
-        // Timer to auto-submit the drawing after a period of inactivity
-        let drawingTimer;
-
-        drawingCanvas.addEventListener("mousemove", () => {
-            clearTimeout(drawingTimer);
-            drawingTimer = setTimeout(autoSubmitDrawing, 2000); // 2 seconds of inactivity
+        // Stop Drawing
+        canvas.addEventListener("mouseup", () => {
+            drawing = false;
+            ctx.closePath();
         });
 
-        drawingCanvas.addEventListener("mouseup", () => {
-            clearTimeout(drawingTimer);
-            drawingTimer = setTimeout(autoSubmitDrawing, 2000); // 2 seconds of inactivity
+        // Clear Canvas
+        clearCanvas.addEventListener("click", () => {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
         });
 
-        function animateSubmittedDrawings() {
-            drawCtx.clearRect(0, 0, drawingCanvas.width, drawingCanvas.height);
-
-            submittedDrawings.forEach((drawing, index) => {
-                if (drawing && drawing.data) {
-                    if (drawing.alpha <= 0) {
-                        submittedDrawings.splice(index, 1);
-                        drawingCounter--;
-
-                        if (drawingCounter < 3 && !drawingTools.classList.contains("active")) {
-                            drawingCanvas.style.pointerEvents = "auto";
-                            drawBtn.style.display = "block";
-                        }
-                        return;
-                    }
-
-                    drawCtx.save();
-                    drawCtx.globalAlpha = drawing.alpha;
-                    drawCtx.putImageData(drawing.data.image, drawing.x, drawing.y);
-                    drawCtx.restore();
-
-                    drawing.x += drawing.speedX;
-                    drawing.y += drawing.speedY;
-
-                    if (drawing.x + 100 > drawingCanvas.width || drawing.x < 0) {
-                        drawing.speedX = -drawing.speedX;
-                    }
-                    if (drawing.y + 100 > drawingCanvas.height || drawing.y < 0) {
-                        drawing.speedY = -drawing.speedY;
-                    }
-
-                    drawing.alpha -= 0.001;
-                } else {
-                    submittedDrawings.splice(index, 1);
-                }
-            });
-
-            requestAnimationFrame(animateSubmittedDrawings);
-        }
-
-        /* =================== BUTTON HANDLERS =================== */
-        const fwBtn = document.getElementById("fireworksBtn");
-        fwBtn.addEventListener("click", () => {
-            if (!fwInterval) {
-                fwInterval = setInterval(createFirework, 600);
-                fwBtn.textContent = "Stop Fireworks";
+        // Save Note
+        saveNote.addEventListener("click", () => {
+            const note = noteInput.value;
+            if (note.trim() !== "") {
+                savedNote.textContent = `Your Note: "${note}"`;
+                noteInput.value = "";
             } else {
-                clearInterval(fwInterval);
-                fwInterval = null;
-                fwBtn.textContent = "Launch Fireworks";
-            }
-        });
-
-        const cfBtn = document.getElementById("confettiBtn");
-        cfBtn.addEventListener("click", () => {
-            if (!cfInterval) {
-                cfInterval = setInterval(createConfetti, 300); 
-                cfBtn.textContent = "Stop Confetti";
-            } else {
-                clearInterval(cfInterval);
-                cfInterval = null;
-                cfBtn.textContent = "Throw Confetti";
+                alert("Please write a note before saving!");
             }
         });
     </script>
