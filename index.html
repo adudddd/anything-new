@@ -151,6 +151,17 @@
             cursor: pointer;
         }
 
+        .wish-text {
+            position: absolute;
+            font-family: 'Arial', sans-serif;
+            font-size: 1rem;
+            color: #fff;
+            text-shadow: 0 0 5px #fff;
+            z-index: 20;
+            opacity: 0;
+            transition: opacity 2s ease-in-out;
+        }
+
         /* Galaxy Swirl Styles */
         .galaxy-particle {
             position: absolute;
@@ -278,7 +289,7 @@
                 const y = e.clientY - rect.top;
                 const selectedColor = colorPicker.value;
 
-                drawStar(x, y, selectedColor);
+                drawStar(x, y, selectedColor); // Draw the star
 
                 const dreamLabel = prompt("Enter a dream or wish for this star:");
                 if (dreamLabel) {
@@ -343,9 +354,7 @@
 
         canvas.addEventListener("click", (e) => {
             if (lineDrawingMode) {
-                // Get the bounding rectangle of the canvas
                 const rect = canvas.getBoundingClientRect();
-                // Calculate the x and y coordinates relative to the canvas
                 const x = e.clientX - rect.left;
                 const y = e.clientY - rect.top;
         
@@ -401,10 +410,33 @@
             document.getElementById('interactive-area').appendChild(shootingStar);
 
             // Allow clicking on the shooting star to make a wish
-            shootingStar.addEventListener('click', () => {
+            shootingStar.addEventListener('click', (event) => {
+                event.stopPropagation();
+                const rect = shootingStar.getBoundingClientRect();
+                const x = event.clientX - rect.left;
+                const y = event.clientY - rect.top;
                 const secretWish = prompt("Make a secret wish upon this shooting star!");
                 if (secretWish) {
-                    console.log("Secret wish:", secretWish); // Log the wish (in a real app, you'd store it securely)
+                    // Add the wish text near the shooting star
+                    const wishText = document.createElement('div');
+                    wishText.className = 'wish-text';
+                    wishText.style.left = `${x}px`;
+                    wishText.style.top = `${y}px`;
+                    wishText.textContent = secretWish;
+                    document.getElementById('interactive-area').appendChild(wishText);
+        
+                    // Fade in the wish text
+                    setTimeout(() => {
+                        wishText.style.opacity = 1;
+                    }, 100);
+        
+                    // Remove the wish text after some time
+                    setTimeout(() => {
+                        wishText.style.opacity = 0;
+                        setTimeout(() => {
+                            wishText.remove();
+                        }, 2000);
+                    }, 5000);
                 }
                 shootingStar.remove(); // Remove the shooting star after click
             });
@@ -417,49 +449,6 @@
 
         // Create a shooting star every 10 seconds (adjust as needed)
         setInterval(createShootingStar, 10000);
-
-        // Galaxy Swirl Effect
-        canvas.addEventListener("mousedown", (e) => {
-            if (!lineDrawingMode) { // Only create galaxy if not in line drawing mode
-                const rect = canvas.getBoundingClientRect();
-                const x = e.clientX - rect.left;
-                const y = e.clientY - rect.top;
-                createGalaxySwirl(x, y);
-            }
-        });
-
-        function createGalaxySwirl(x, y) {
-            const numParticles = 50; // Adjust for more/fewer particles
-            for (let i = 0; i < numParticles; i++) {
-                createGalaxyParticle(x, y);
-            }
-        }
-
-        function createGalaxyParticle(x, y) {
-            const particle = document.createElement("div");
-            particle.className = "galaxy-particle";
-            particle.style.left = `${x}px`;
-            particle.style.top = `${y}px`;
-
-            // Randomize size, offset, and animation delay for variety
-            const size = Math.random() * 3 + 1;
-            const offsetX = (Math.random() - 0.5) * 50;
-            const offsetY = (Math.random() - 0.5) * 50;
-            const animationDelay = Math.random() * 2;
-
-            particle.style.width = `${size}px`;
-            particle.style.height = `${size}px`;
-            particle.style.animationDelay = `${animationDelay}s`;
-            particle.style.left = `${x + offsetX}px`;
-            particle.style.top = `${y + offsetY}px`;
-
-            document.getElementById("interactive-area").appendChild(particle);
-
-            // Remove the particle after the animation ends
-            setTimeout(() => {
-                particle.remove();
-            }, 5000 + animationDelay * 1000);
-        }
     </script>
 </body>
 </html>
