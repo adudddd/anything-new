@@ -53,7 +53,7 @@
         .faded-drawing {
             position: absolute;
             opacity: 0.2;
-            transition: all 1s;
+            transition: opacity 5s; /* Transition for the opacity */
         }
     </style>
 </head>
@@ -92,6 +92,9 @@
         drawLine.addEventListener("click", () => drawingMode = "line");
         drawSquare.addEventListener("click", () => drawingMode = "square");
 
+        // Drawing timer
+        let drawingTimer;
+
         // Start Drawing
         canvas.addEventListener("mousedown", (e) => {
             drawing = true;
@@ -99,17 +102,31 @@
             startY = e.offsetY;
             ctx.strokeStyle = colorPicker.value;
             ctx.lineWidth = 2;
+
+            if (drawingMode === "line") {
+                ctx.beginPath(); // Start a new path for the line
+                ctx.moveTo(startX, startY);
+            }
+
+            // Reset the auto-submit timer on new mousedown
+            clearTimeout(drawingTimer);
+            drawingTimer = setTimeout(autoSubmitDrawing, 2000);
         });
 
         // Draw
         canvas.addEventListener("mousemove", (e) => {
             const now = Date.now();
-            if (drawing && now - lastTime > 16) { // Throttle to ~60 FPS
+            if (drawing && now - lastTime > 16) {
                 if (drawingMode === "line") {
                     ctx.lineTo(e.offsetX, e.offsetY);
                     ctx.stroke();
                 }
+
                 lastTime = now;
+
+                // Reset the auto-submit timer if still drawing
+                clearTimeout(drawingTimer);
+                drawingTimer = setTimeout(autoSubmitDrawing, 2000);
             }
         });
 
@@ -121,7 +138,6 @@
                 ctx.strokeRect(startX, startY, width, height);
             }
             drawing = false;
-            setTimeout(autoSubmitDrawing, 2000); // Auto-submit after 2 seconds
         });
 
         // Clear Canvas
@@ -131,29 +147,36 @@
 
         // Submit Drawing Functionality
         let activeDrawings = 0;
+        let drawingData = [];
 
+        // Auto-submit the drawing to the interactive area
         function autoSubmitDrawing() {
-            if (activeDrawings >= 3) return;
+            if (drawingData.length === 0 || activeDrawings >= 3) {
+                return;
+            }
 
-            const drawingData = canvas.toDataURL("image/png");
             const img = new Image();
-            img.src = drawingData;
+            img.src = canvas.toDataURL("image/png");
             img.className = "faded-drawing";
             img.style.left = `${Math.random() * (interactiveArea.clientWidth - canvas.width)}px`;
             img.style.top = `${Math.random() * (interactiveArea.clientHeight - canvas.height)}px`;
             img.onload = () => {
                 interactiveArea.appendChild(img);
                 activeDrawings++;
+
+                // Remove after some time
                 setTimeout(() => {
-                    img.style.opacity = 0.05; // Faded effect
+                    img.style.opacity = 0;
                     setTimeout(() => {
-                        interactiveArea.removeChild(img);
+                        if (img.parentNode) {
+                            img.parentNode.removeChild(img);
+                        }
                         activeDrawings--;
                     }, 5000);
                 }, 1000);
             };
 
-            // Clear Canvas for New Drawing
+            drawingData = [];
             ctx.clearRect(0, 0, canvas.width, canvas.height);
         }
     </script>
