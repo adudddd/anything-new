@@ -148,8 +148,28 @@
             height: 3px;
             background: linear-gradient(to right, white, transparent);
             animation: shooting 2s linear;
-            pointer-events: auto; /* Allow clicks on shooting star */
             cursor: pointer;
+        }
+
+        /* Galaxy Swirl Styles */
+        .galaxy-particle {
+            position: absolute;
+            background-color: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            pointer-events: none;
+            opacity: 0;
+            animation: swirl 5s linear forwards;
+        }
+
+        @keyframes swirl {
+            0% {
+                opacity: 0.5;
+                transform: scale(0) rotate(0deg);
+            }
+            100% {
+                opacity: 0;
+                transform: scale(1) rotate(360deg) translateX(50px);
+            }
         }
     </style>
     <link href="https://fonts.googleapis.com/css2?family=Cedarville+Cursive&family=Dancing+Script&display=swap" rel="stylesheet">
@@ -253,12 +273,13 @@
         canvas.addEventListener("click", (e) => {
             if (!lineDrawingMode) {
                 drawing = true;
-                const x = e.offsetX;
-                const y = e.offsetY;
+                const rect = canvas.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
                 const selectedColor = colorPicker.value;
-    
-                drawStar(x, y, selectedColor); // Draw the star
-    
+
+                drawStar(x, y, selectedColor);
+
                 const dreamLabel = prompt("Enter a dream or wish for this star:");
                 if (dreamLabel) {
                     addDreamText(x, y, dreamLabel);
@@ -268,9 +289,9 @@
 
         // Function to draw a star on the canvas
         function drawStar(x, y, color) {
-            const numPoints = 5; // Number of points in the star
-            const outerRadius = 10; // Outer radius of the star
-            const innerRadius = 4; // Inner radius of the star
+            const numPoints = 5;
+            const outerRadius = 10;
+            const innerRadius = 4;
             
             ctx.beginPath();
             ctx.moveTo(x, y - outerRadius);
@@ -289,7 +310,6 @@
             ctx.shadowBlur = 10;
             ctx.fill();
 
-            // Store the star's position and color
             stars.push({ x, y, color });
         }
 
@@ -323,7 +343,13 @@
 
         canvas.addEventListener("click", (e) => {
             if (lineDrawingMode) {
-                const clickedStar = findClickedStar(e.offsetX, e.offsetY);
+                // Get the bounding rectangle of the canvas
+                const rect = canvas.getBoundingClientRect();
+                // Calculate the x and y coordinates relative to the canvas
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+        
+                const clickedStar = findClickedStar(x, y);
                 if (clickedStar) {
                     if (lastStarClicked && lastStarClicked !== clickedStar) {
                         // Draw a line between the stars
@@ -341,7 +367,6 @@
             for (let i = 0; i < stars.length; i++) {
                 const star = stars[i];
                 const distance = Math.sqrt((x - star.x) ** 2 + (y - star.y) ** 2);
-                // Check if the click is within the star's radius
                 if (distance <= 10) {
                     return star;
                 }
@@ -392,6 +417,49 @@
 
         // Create a shooting star every 10 seconds (adjust as needed)
         setInterval(createShootingStar, 10000);
+
+        // Galaxy Swirl Effect
+        canvas.addEventListener("mousedown", (e) => {
+            if (!lineDrawingMode) { // Only create galaxy if not in line drawing mode
+                const rect = canvas.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                createGalaxySwirl(x, y);
+            }
+        });
+
+        function createGalaxySwirl(x, y) {
+            const numParticles = 50; // Adjust for more/fewer particles
+            for (let i = 0; i < numParticles; i++) {
+                createGalaxyParticle(x, y);
+            }
+        }
+
+        function createGalaxyParticle(x, y) {
+            const particle = document.createElement("div");
+            particle.className = "galaxy-particle";
+            particle.style.left = `${x}px`;
+            particle.style.top = `${y}px`;
+
+            // Randomize size, offset, and animation delay for variety
+            const size = Math.random() * 3 + 1;
+            const offsetX = (Math.random() - 0.5) * 50;
+            const offsetY = (Math.random() - 0.5) * 50;
+            const animationDelay = Math.random() * 2;
+
+            particle.style.width = `${size}px`;
+            particle.style.height = `${size}px`;
+            particle.style.animationDelay = `${animationDelay}s`;
+            particle.style.left = `${x + offsetX}px`;
+            particle.style.top = `${y + offsetY}px`;
+
+            document.getElementById("interactive-area").appendChild(particle);
+
+            // Remove the particle after the animation ends
+            setTimeout(() => {
+                particle.remove();
+            }, 5000 + animationDelay * 1000);
+        }
     </script>
 </body>
 </html>
