@@ -2,228 +2,199 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Our Sky of Dreams</title>
+    <title>Interactive Fireworks Sky</title>
     <style>
-        /* Styling for the night sky and interactive elements */
         body {
             margin: 0;
-            padding: 0;
-            background: linear-gradient(to bottom, #19073f, #331e57);
+            overflow: hidden;
+            background: linear-gradient(to bottom, #080820, #0f1f35);
             font-family: 'Arial', sans-serif;
             color: #fff;
-            overflow: hidden;
-        }
-
-        .header-container {
             display: flex;
-            justify-content: space-between;
+            justify-content: center;
             align-items: center;
-            padding: 20px;
-        }
-
-        #countdown {
-            font-family: 'Arial', sans-serif;
-            color: #ffcc5c;
-            font-size: 1.2rem;
-            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.8);
-        }
-
-        h1 {
-            font-family: 'Cedarville Cursive', cursive;
-            text-align: center;
-            font-size: 4rem;
-            margin-bottom: 30px;
-            text-shadow: 0 0 10px #fff, 0 0 20px #fff, 0 0 30px #e60073, 0 0 40px #e60073;
-        }
-
-        /* Container for the star field and drawing area */
-        #interactive-area {
-            position: relative;
-            width: 100vw;
             height: 100vh;
-            z-index: 1;
-            overflow: hidden;
         }
 
-        #star-canvas, #zodiac-canvas, #constellation-canvas, #drawingCanvas {
+        #skyCanvas {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
+            z-index: 1;
         }
 
-        /* Drawing Canvas */
-        #drawingCanvas {
-            cursor: crosshair;
-            z-index: 10;
-        }
-
-        .dream-text {
+        #countdown {
             position: absolute;
-            font-family: 'Dancing Script', cursive;
-            font-size: 1.5rem;
-            color: #ffd700;
-            text-shadow: 0 0 5px #fff;
-            z-index: 20;
-            opacity: 0;
-            transition: opacity 0.5s ease, font-size 0.5s ease;
-        }
-
-        .dream-text.visible {
-            opacity: 1;
-            font-size: 1.6rem;
-        }
-
-        /* (Rest of your existing CSS styles) */
-        .color-picker {
-          -webkit-appearance: none;
-          -moz-appearance: none;
-          appearance: none;
-          width: 40px;
-          height: 40px;
-          border: 2px solid #fff;
-          border-radius: 8px;
-          cursor: pointer;
-          background-color: transparent;
-          padding: 0;
-          box-shadow: 0 2px 5px rgba(0, 0, 0, 0.4);
-          margin: 0 5px;
-        }
-
-        .color-picker::-webkit-color-swatch-wrapper {
-          padding: 0;
-        }
-
-        .color-picker::-webkit-color-swatch {
-          border: none;
-          border-radius: 6px;
-        }
-
-        .color-picker::-moz-color-swatch {
-          border: none;
-          border-radius: 6px;
-        }
-
-        /* Add styles for form elements */
-        .input-container {
-            position: fixed;
             top: 20px;
             left: 50%;
             transform: translateX(-50%);
-            z-index: 40;
-            background-color: rgba(0, 0, 0, 0.6);
-            padding: 15px;
-            border-radius: 10px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
+            font-family: 'Arial', sans-serif;
+            color: #ffcc5c;
+            font-size: 2rem;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.8);
+            z-index: 10;
         }
 
-        .input-container input,
-        .input-container select {
-            margin: 5px 0;
-            padding: 8px;
-            border: 1px solid #fff;
-            border-radius: 5px;
-            background-color: rgba(255, 255, 255, 0.8);
-            color: #333;
+        @keyframes twinkle {
+            0% { opacity: 0.8; }
+            50% { opacity: 0.4; }
+            100% { opacity: 0.8; }
         }
 
-        .input-container button {
-            padding: 10px 20px;
-            margin-top: 10px;
-            border: none;
-            background-color: #e60073;
-            color: #fff;
-            font-weight: bold;
-            cursor: pointer;
-            border-radius: 5px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
-            transition: background-color 0.3s ease;
-        }
-
-        .input-container button:hover {
-            background-color: #ff3399;
-        }
-
-        /* ... */
-
-        .highlight {
-            stroke: #ff6b6b !important;
-            stroke-width: 4 !important;
-            filter: drop-shadow(0 0 8px #ff6b6b) !important;
-        }
-
-        .constellation-image {
+        .star {
             position: absolute;
-            opacity: 0.7;
-            z-index: 4;
-            pointer-events: none; /* Prevent image from interfering with canvas clicks */
+            width: 2px;
+            height: 2px;
+            background-color: #fff;
+            border-radius: 50%;
+            animation: twinkle 3s linear infinite;
+            pointer-events: none;
         }
 
+        /* Confetti Styles */
+        .confetti {
+            position: fixed;
+            left: 50%;
+            top: -10px; /* Start above the viewport */
+            width: 10px;
+            height: 16px;
+            background-color: #f00;
+            transform: translateX(-50%);
+            opacity: 0;
+            z-index: 20; /* Make it fall in front of the stars */
+            pointer-events: none; /* Allow interaction with the sky */
+        }
+
+        .confetti.show {
+            animation: confetti-fall 5s linear forwards;
+            opacity: 1;
+        }
+
+        @keyframes confetti-fall {
+            0% {
+                top: -10px;
+                opacity: 1;
+            }
+            80% {
+                opacity: 1;
+            }
+            95% {
+                opacity: 0.5;
+            }
+            100% {
+                top: 100vh; /* Fall to bottom of the viewport */
+                opacity: 0;
+            }
+        }
     </style>
-    <link href="https://fonts.googleapis.com/css2?family=Cedarville+Cursive&family=Dancing+Script&display=swap" rel="stylesheet">
 </head>
 <body>
-    <!-- ... (Your existing HTML) ... -->
-    <div class="header-container">
-        <div id="countdown"></div>
-        <h1>Our Sky of Dreams</h1>
-    </div>
-
-    <div id="interactive-area">
-        <!-- Form for user input -->
-        <div class="input-container">
-            <input type="date" id="birthDate" required>
-            <select id="birthLocation">
-                <option value="mumbai">Mumbai</option>
-                <option value="delhi">Delhi</option>
-                <option value="bangalore">Bangalore</option>
-                <option value="chennai">Chennai</option>
-                <option value="hyderabad">Hyderabad</option>
-                <option value="kolkata">Kolkata</option>
-                <option value="pune">Pune</option>
-                <option value="ahmedabad">Ahmedabad</option>
-                <option value="jaipur">Jaipur</option>
-                <option value="lucknow">Lucknow</option>
-                <!-- Add more Indian locations as needed -->
-            </select>
-            <button id="showZodiac">Show My Zodiac</button>
-        </div>
-        <canvas id="zodiac-canvas"></canvas>
-        <canvas id="star-canvas"></canvas>
-        <canvas id="constellation-canvas"></canvas>
-        <canvas id="drawingCanvas"></canvas>
-        <img id="constellationImage" class="constellation-image" src="" alt="Constellation">
-    </div>
-
-    <audio id="backgroundMusic" loop>
-        <source src="https://audio.jukehost.co.uk/S96cEVMiNhw6hL54HkEdfR9c8yqIHVlO.mp3" type="audio/mpeg">
-        Your browser does not support the audio element.
-    </audio>
-
-    <button id="toggleMusic" class="audio-control">
-        <svg id="speakerIcon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
-            <path id="wave1" d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
-            <path id="wave2" d="M19.07 4.93a10 10 0 0 1 0 14.14"></path>
-        </svg>
-        <svg id="muteIcon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: none;">
-            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
-            <line x1="23" y1="9" x2="17" y2="15"></line>
-            <line x1="17" y1="9" x2="23" y2="15"></line>
-        </svg>
-    </button>
-    
-
-    <div class="tools">
-        <input type="color" id="colorPicker" class="color-picker" value="#ffb6c1">
-        <button id="drawLine">Connect Stars</button>
-        <button id="shareSky" class="share-button">Share Sky</button>
-    </div>
+    <div id="countdown"></div>
+    <canvas id="skyCanvas"></canvas>
 
     <script>
+        const canvas = document.getElementById('skyCanvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        // Function to create stars
+        function createStar(x, y) {
+            const star = document.createElement('div');
+            star.classList.add('star');
+            star.style.left = `${x}px`;
+            star.style.top = `${y}px`;
+            document.body.appendChild(star);
+        }
+
+        // Generate stars on canvas
+        function generateStars(numStars) {
+            for (let i = 0; i < numStars; i++) {
+                const x = Math.random() * canvas.width;
+                const y = Math.random() * canvas.height;
+                createStar(x, y);
+            }
+        }
+
+        // Initialize the stars
+        generateStars(100);
+
+        // Fireworks animation function
+        function createFirework(x, y, numParticles) {
+            for (let i = 0; i < numParticles; i++) {
+                const angle = (i / numParticles) * 2 * Math.PI;
+                const speed = 5 + Math.random() * 5;
+                const particle = {
+                    x: x,
+                    y: y,
+                    vx: speed * Math.cos(angle),
+                    vy: speed * Math.sin(angle),
+                    color: `hsl(${Math.random() * 360}, 100%, 50%)`,
+                    size: 2 + Math.random() * 3,
+                    life: 100
+                };
+
+                drawParticle(particle);
+                fireworkParticles.push(particle);
+            }
+        }
+
+        // Array to store firework particles
+        const fireworkParticles = [];
+
+        // Draw a single firework particle
+        function drawParticle(particle) {
+            ctx.beginPath();
+            ctx.arc(particle.x, particle.y, particle.size, 0, 2 * Math.PI, false);
+            ctx.fillStyle = particle.color;
+            ctx.fill();
+        }
+
+        // Update particle position and life
+        function updateParticle(particle) {
+            particle.x += particle.vx;
+            particle.y += particle.vy;
+            particle.vy += 0.1; // Simulate gravity
+            particle.life--;
+            particle.size *= 0.99; // Make the particle shrink over time
+        }
+
+        // Event listener for mouse interaction (firework creation)
+        canvas.addEventListener('mousemove', (e) => {
+            createFirework(e.clientX, e.clientY, 20 + Math.random() * 10);
+        });
+
+        // Animation loop
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear canvas
+
+            // Update and draw each particle
+            for (let i = fireworkParticles.length - 1; i >= 0; i--) {
+                updateParticle(fireworkParticles[i]);
+                if (fireworkParticles[i].life <= 0) {
+                    fireworkParticles.splice(i, 1); // Remove particle if life is over
+                } else {
+                    drawParticle(fireworkParticles[i]);
+                }
+            }
+
+            requestAnimationFrame(animate);
+        }
+
+        // Function to create a confetti particle
+        function createConfettiParticle(color) {
+            const confetti = document.createElement('div');
+            confetti.classList.add('confetti');
+            confetti.style.backgroundColor = color;
+            confetti.style.left = `${Math.random() * 100}vw`; // Randomly across viewport
+            confetti.style.top = '-10px';
+            document.body.appendChild(confetti);
+            setTimeout(() => confetti.remove(), 5000); // Remove after animation
+        }
+
+        // New Year countdown
         const countdownDisplay = document.getElementById("countdown");
 
         function updateCountdown() {
@@ -240,738 +211,25 @@
 
             if (diff <= 0) {
                 countdownDisplay.textContent = "Happy New Year!";
+                triggerConfetti();
                 clearInterval(countdownInterval);
+            }
+        }
+
+        // Trigger the confetti shower
+        function triggerConfetti() {
+            const confettiColors = ['#f00', '#0f0', '#00f', '#ff0', '#f0f', '#0ff']; // Example colors
+            for (let i = 0; i < 200; i++) {
+                // Create a bunch of confetti particles
+                createConfettiParticle(confettiColors[i % confettiColors.length]);
             }
         }
 
         const countdownInterval = setInterval(updateCountdown, 1000);
         updateCountdown();
 
-        // Audio logic with Mute Button
-        const backgroundMusic = document.getElementById("backgroundMusic");
-        const speakerIcon = document.getElementById("speakerIcon");
-        const muteIcon = document.getElementById("muteIcon");
-        let isMuted = false;
-
-        // Function to toggle mute state
-        function toggleMute() {
-            isMuted = !isMuted;
-            backgroundMusic.muted = isMuted;
-
-            // Toggle the speaker and mute icons
-            speakerIcon.style.display = isMuted ? "none" : "block";
-            muteIcon.style.display = isMuted ? "block" : "none";
-        }
-
-        // Event listener for the mute button
-        const toggleMusicButton = document.getElementById("toggleMusic");
-        toggleMusicButton.addEventListener("click", toggleMute);
-
-        // Function to create a star element with animation
-        function createStar(x, y, color) {
-            const star = document.createElement('div');
-            star.style.position = 'absolute';
-            star.style.left = `${x}px`;
-            star.style.top = `${y}px`;
-            star.style.width = '2px';
-            star.style.height = '2px';
-            star.style.backgroundColor = color;
-            star.style.boxShadow = `0 0 10px ${color}`;
-            star.style.borderRadius = '50%';
-            star.style.opacity = '0';
-            star.style.transition = 'opacity 1s ease-in-out';
-            document.getElementById('interactive-area').appendChild(star);
-            
-            // Trigger the animation
-            setTimeout(() => {
-                star.style.opacity = Math.random() * 0.5 + 0.5;
-            }, 100);
-        
-            return star;
-        }
-
-        // Generate random stars on the canvas
-        function generateStars(numStars) {
-            const canvas = document.getElementById('star-canvas');
-            const ctx = canvas.getContext('2d');
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-
-            for (let i = 0; i < numStars; i++) {
-                const x = Math.random() * canvas.width;
-                const y = Math.random() * canvas.height;
-                const radius = Math.random() * 1.5;
-                const color = '#FFFFFF';
-
-                ctx.beginPath();
-                ctx.arc(x, y, radius, 0, Math.PI * 2, false);
-                ctx.fillStyle = color;
-                ctx.shadowColor = color;
-                ctx.shadowBlur = Math.random() * 10;
-                ctx.fill();
-            }
-        }
-
-        // Initialize the stars
-        generateStars(100);
-
-        const constellationImage = document.getElementById('constellationImage');
-
-        // Enhanced Zodiac Constellation Drawing
-        const zodiacData = {
-            Aries: {
-                stars: [[100, 200], [150, 250], [180, 230]],
-                lines: [[0, 1], [1, 2]],
-                imageUrl: 'images/aries.png' // Add image URL for Aries
-            },
-            Taurus: {
-                stars: [[300, 100], [350, 150], [380, 130], [420, 180]],
-                lines: [[0, 1], [1, 2], [2, 3]],
-                imageUrl: 'images/taurus.png' // Add image URL for Taurus
-            },
-            Gemini: {
-                stars: [[500, 200], [550, 250], [580, 230], [620, 280]],
-                lines: [[0, 1], [1, 2], [2, 3]],
-                imageUrl: 'images/gemini.png' // Add image URL for Gemini
-            },
-            Cancer: {
-                stars: [[100, 400], [150, 350], [180, 370], [220, 320]],
-                lines: [[0, 1], [1, 2], [2, 3]],
-                imageUrl: 'images/cancer.png' // Add image URL for Cancer
-            },
-            Leo: {
-                stars: [[300, 500], [350, 450], [380, 470], [420, 420]],
-                lines: [[0, 1], [1, 2], [2, 3]],
-                imageUrl: 'images/leo.png' // Add image URL for Leo
-            },
-            Virgo: {
-                stars: [[500, 600], [550, 550], [580, 570], [620, 520]],
-                lines: [[0, 1], [1, 2], [2, 3]],
-                imageUrl: 'images/virgo.png' // Add image URL for Virgo
-            },
-            Libra: {
-                stars: [[700, 200], [750, 250], [780, 230], [820, 280]],
-                lines: [[0, 1], [1, 2], [2, 3]],
-                imageUrl: 'images/libra.png' // Add image URL for Libra
-            },
-            Scorpio: {
-                stars: [[900, 100], [950, 150], [980, 130], [1020, 180]],
-                lines: [[0, 1], [1, 2], [2, 3]],
-                imageUrl: 'images/scorpio.png' // Add image URL for Scorpio
-            },
-            Sagittarius: {
-                stars: [[1100, 200], [1150, 250], [1180, 230], [1220, 280]],
-                lines: [[0, 1], [1, 2], [2, 3]],
-                imageUrl: 'images/sagittarius.png' // Add image URL for Sagittarius
-            },
-            Capricorn: {
-                stars: [[700, 400], [750, 350], [780, 370], [820, 320]],
-                lines: [[0, 1], [1, 2], [2, 3]],
-                imageUrl: 'images/capricorn.png' // Add image URL for Capricorn
-            },
-            Aquarius: {
-                stars: [[900, 500], [950, 450], [980, 470], [1020, 420]],
-                lines: [[0, 1], [1, 2], [2, 3]],
-                imageUrl: 'images/aquarius.png' // Add image URL for Aquarius
-            },
-            Pisces: {
-                stars: [[1100, 600], [1150, 550], [1180, 570], [1220, 520]],
-                lines: [[0, 1], [1, 2], [2, 3]],
-                imageUrl: 'images/pisces.png' // Add image URL for Pisces
-            }
-            // Add data for other zodiac signs
-        };
-
-        // This is the Update function for zodiac constellations based on birthdate and location
-        function updateZodiacConstellation(birthDate, location) {
-            const zodiacSign = getZodiacSign(birthDate);
-            drawZodiacConstellation(zodiacSign);
-            showConstellationImage(zodiacSign);
-        }
-
-        // Function to show the image of the zodiac constellation
-        function showConstellationImage(zodiacSign) {
-            const img = document.getElementById('constellationImage');
-            if (zodiacData[zodiacSign] && zodiacData[zodiacSign].imageUrl) {
-                img.src = zodiacData[zodiacSign].imageUrl;
-                img.style.display = 'block';
-
-                // Get constellation canvas for positioning
-                const zodiacCanvas = document.getElementById('zodiac-canvas');
-
-                // Position the image based on the constellation
-                const constellation = zodiacData[zodiacSign];
-                const scaleFactor = Math.min(zodiacCanvas.width, zodiacCanvas.height) / 500; // Same as in drawZodiacConstellation
-
-                // Calculate average position of stars for central positioning
-                let avgX = 0, avgY = 0;
-                constellation.stars.forEach(star => {
-                    avgX += star[0] * scaleFactor;
-                    avgY += star[1] * scaleFactor;
-                });
-                avgX /= constellation.stars.length;
-                avgY /= constellation.stars.length;
-
-                // Set image position (adjust as needed)
-                img.style.left = `${avgX - img.width / 2}px`;
-                img.style.top = `${avgY - img.height / 2}px`;
-
-            } else {
-                img.style.display = 'none';
-            }
-        }
-
-        // Event listener for the 'Show My Zodiac' button
-        document.getElementById("showZodiac").addEventListener("click", function() {
-            const birthDate = new Date(document.getElementById("birthDate").value);
-            const location = document.getElementById("birthLocation").value;
-            updateZodiacConstellation(birthDate, location);
-        });
-
-        function getZodiacSign(birthDate) {
-            const day = birthDate.getDate();
-            const month = birthDate.getMonth() + 1;
-
-            if ((month === 3 && day >= 21) || (month === 4 && day <= 19)) return 'Aries';
-            if ((month === 4 && day >= 20) || (month === 5 && day <= 20)) return 'Taurus';
-            if ((month === 5 && day >= 21) || (month === 6 && day <= 21)) return 'Gemini';
-            if ((month === 6 && day >= 22) || (month === 7 && day <= 22)) return 'Cancer';
-            if ((month === 7 && day >= 23) || (month === 8 && day <= 22)) return 'Leo';
-            if ((month === 8 && day >= 23) || (month === 9 && day <= 22)) return 'Virgo';
-            if ((month === 9 && day >= 23) || (month === 10 && day <= 23)) return 'Libra';
-            if ((month === 10 && day >= 24) || (month === 11 && day <= 21)) return 'Scorpio';
-            if ((month === 11 && day >= 22) || (month === 12 && day <= 21)) return 'Sagittarius';
-            if ((month === 12 && day >= 22) || (month === 1 && day <= 19)) return 'Capricorn';
-            if ((month === 1 && day >= 20) || (month === 2 && day <= 18)) return 'Aquarius';
-            if ((month === 2 && day >= 19) || (month === 3 && day <= 20)) return 'Pisces';
-            
-            return ''; // Default case
-        }
-
-        function drawZodiacConstellation(zodiacSign) {
-            const canvas = document.getElementById('zodiac-canvas');
-            const ctx = canvas.getContext('2d');
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-
-            if (zodiacData[zodiacSign]) {
-                const constellation = zodiacData[zodiacSign];
-                const scaleFactor = Math.min(canvas.width, canvas.height) / 500; // Adjust scaling factor
-
-                // Clear any previous zodiac drawing
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-                // Draw lines for the constellation
-                ctx.beginPath();
-                ctx.strokeStyle = 'rgba(255, 255, 255, 0.8)';
-                ctx.lineWidth = 3;
-                ctx.shadowBlur = 10;
-                ctx.shadowColor = 'white';
-
-                constellation.lines.forEach(line => {
-                    const start = constellation.stars[line[0]];
-                    const end = constellation.stars[line[1]];
-                    ctx.moveTo(start[0] * scaleFactor, start[1] * scaleFactor);
-                    ctx.lineTo(end[0] * scaleFactor, end[1] * scaleFactor);
-                });
-
-                ctx.stroke();
-                ctx.closePath();
-                ctx.shadowBlur = 0;
-
-                // Highlight effect on hover or when drawing lines
-                canvas.addEventListener('mousemove', (e) => {
-                    const mouseX = e.clientX - canvas.offsetLeft;
-                    const mouseY = e.clientY - canvas.offsetTop;
-
-                    let isNearConstellation = constellation.stars.some(star => {
-                        const [x, y] = [star[0] * scaleFactor, star[1] * scaleFactor];
-                        const distance = Math.sqrt((mouseX - x) ** 2 + (mouseY - y) ** 2);
-                        return distance < 20;
-                    });
-
-                    if (isNearConstellation) {
-                        canvas.classList.add('highlight');
-                    } else {
-                        canvas.classList.remove('highlight');
-                    }
-                });
-
-                // Style the constellation based on the zodiac sign
-                canvas.classList.add(constellation.styleClass);
-
-            }
-        }
-
-        // Function for zodiac constellations based on date and location
-        function drawZodiacConstellations() {
-            const canvas = document.getElementById('zodiac-canvas');
-            const ctx = canvas.getContext('2d');
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-            ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)';
-            ctx.lineWidth = 1;
-        
-            // Define constellations with named stars and line connections
-            const constellations = {
-                Aries: {
-                    stars: [[100, 200], [150, 250], [180, 230]],
-                    lines: [[0, 1], [1, 2]]
-                },
-                Taurus: {
-                    stars: [[300, 100], [350, 150], [380, 130], [420, 180]],
-                    lines: [[0, 1], [1, 2], [2, 3]]
-                },
-                Gemini: {
-                    stars: [[500, 200], [550, 250], [580, 230], [620, 280]],
-                    lines: [[0, 1], [1, 2], [2, 3]]
-                },
-                Cancer: {
-                    stars: [[100, 400], [150, 350], [180, 370], [220, 320]],
-                    lines: [[0, 1], [1, 2], [2, 3]]
-                },
-                Leo: {
-                    stars: [[300, 500], [350, 450], [380, 470], [420, 420]],
-                    lines: [[0, 1], [1, 2], [2, 3]]
-                },
-                Virgo: {
-                    stars: [[500, 600], [550, 550], [580, 570], [620, 520]],
-                    lines: [[0, 1], [1, 2], [2, 3]]
-                },
-                Libra: {
-                    stars: [[700, 200], [750, 250], [780, 230], [820, 280]],
-                    lines: [[0, 1], [1, 2], [2, 3]]
-                },
-                Scorpio: {
-                    stars: [[900, 100], [950, 150], [980, 130], [1020, 180]],
-                    lines: [[0, 1], [1, 2], [2, 3]]
-                },
-                Sagittarius: {
-                    stars: [[1100, 200], [1150, 250], [1180, 230], [1220, 280]],
-                    lines: [[0, 1], [1, 2], [2, 3]]
-                },
-                Capricorn: {
-                    stars: [[700, 400], [750, 350], [780, 370], [820, 320]],
-                    lines: [[0, 1], [1, 2], [2, 3]]
-                },
-                Aquarius: {
-                    stars: [[900, 500], [950, 450], [980, 470], [1020, 420]],
-                    lines: [[0, 1], [1, 2], [2, 3]]
-                },
-                Pisces: {
-                    stars: [[1100, 600], [1150, 550], [1180, 570], [1220, 520]],
-                    lines: [[0, 1], [1, 2], [2, 3]]
-                }
-            };
-        
-            // Function to draw a constellation
-            function drawConstellation(constellation) {
-                ctx.beginPath();
-                constellation.stars.forEach(star => {
-                    ctx.lineTo(star[0], star[1]);
-                });
-                ctx.stroke();
-            }
-        
-            // Draw each constellation
-            Object.values(constellations).forEach(constellation => {
-                drawConstellation(constellation);
-            });
-        }
-
-        // Call the function to draw zodiac constellations
-        drawZodiacConstellations();
-
-        // Canvas for drawing
-        const canvas = document.getElementById("drawingCanvas");
-        const ctx = canvas.getContext("2d");
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
-
-        let userStars = [];
-        let wishCounter = 0; // Counter for wishes made on shooting stars
-
-        // Get the selected color from the color picker
-        const colorPicker = document.getElementById("colorPicker");
-
-        // Event listener to start drawing a star
-        canvas.addEventListener("click", (e) => {
-            if (!lineDrawingMode) {
-                const rect = canvas.getBoundingClientRect();
-                const x = e.clientX - rect.left;
-                const y = e.clientY - rect.top;
-                const selectedColor = colorPicker.value;
-
-                drawStar(x, y, selectedColor);
-
-                const dreamLabel = prompt("Enter a dream or wish for this star:");
-                if (dreamLabel) {
-                    addDreamText(x, y, dreamLabel);
-                }
-            }
-        });
-
-        // Function to draw a star on the canvas
-        function drawStar(x, y, initialColor) {
-            const outerRadius = 5 + Math.random() * 5;
-            const innerRadius = 2 + Math.random() * 3;
-            let color = initialColor;
-            let colorPhase = 0; // 0 for increasing, 1 for decreasing
-        
-            ctx.beginPath();
-            ctx.moveTo(x, y - outerRadius);
-        
-            for (let i = 0; i < 10; i++) {
-                const radius = i % 2 === 0 ? outerRadius : innerRadius;
-                const angle = (i * Math.PI) / 5;
-                const pointX = x + radius * Math.sin(angle);
-                const pointY = y - radius * Math.cos(angle);
-                ctx.lineTo(pointX, pointY);
-            }
-        
-            ctx.closePath();
-            ctx.fillStyle = color;
-            ctx.shadowColor = color;
-            ctx.shadowBlur = 10;
-            ctx.fill();
-        
-            const starElement = createStar(x, y, initialColor);
-            userStars.push({ x, y, color: initialColor, element: starElement });
-        
-            // Set up color cycling
-            setInterval(() => {
-                color = cycleColor(color, colorPhase);
-                starElement.style.backgroundColor = color;
-                starElement.style.boxShadow = `0 0 10px ${color}`;
-                colorPhase = (colorPhase + 1) % 360;
-            }, 100); // Change color every 100 milliseconds
-        
-            starElement.addEventListener('mouseover', () => {
-                showDreamText(x, y);
-                highlightConstellation(x, y);
-            });
-        
-            starElement.addEventListener('mouseout', () => {
-                hideDreamText();
-            });
-        }
-
-        function cycleColor(currentColor, phase) {
-            let r, g, b;
-        
-            // Convert current color to RGB
-            if (currentColor.startsWith('#')) {
-                const hex = currentColor.substring(1);
-                r = parseInt(hex.substring(0, 2), 16);
-                g = parseInt(hex.substring(2, 4), 16);
-                b = parseInt(hex.substring(4, 6), 16);
-            } else if (currentColor.startsWith('rgb')) {
-                [r, g, b] = currentColor.match(/\d+/g).map(Number);
-            }
-        
-            // Cycle the color with a gentle change in hue
-            const newColor = `hsl(${phase}, 100%, 50%)`;
-        
-            return newColor;
-        }
-        
-        // Add a global variable to track added dream texts
-        let dreamTexts = [];
-
-        // Function to add dream text next to a star
-        function addDreamText(x, y, text) {
-            const dreamText = document.createElement("div");
-            dreamText.className = "dream-text";
-            dreamText.style.left = `${x + 20}px`;
-            dreamText.style.top = `${y - 10}px`;
-            dreamText.textContent = text;
-            document.getElementById("interactive-area").appendChild(dreamText);
-        
-            // Store the dream text and its position
-            dreamTexts.push({ text: dreamText, x: x, y: y });
-        }
-
-        function showDreamText(x, y) {
-            for (let dreamText of dreamTexts) {
-                // Check if the mouse is near the star (within a certain radius)
-                const distance = Math.sqrt((x - dreamText.x) ** 2 + (y - dreamText.y) ** 2);
-                if (distance < 20) {
-                    dreamText.text.classList.add('visible');
-                    break; // Show only one dream text at a time
-                }
-            }
-        }
-        
-        function hideDreamText() {
-            for (let dreamText of dreamTexts) {
-                                dreamText.text.classList.remove('visible');
-            }
-        }
-
-        function highlightConstellation(x, y) {
-            // Find the clicked star
-            const clickedStar = findClickedStar(x, y);
-            if (!clickedStar) return;
-
-            // Reset all stars and lines to their default state
-            userStars.forEach(star => {
-                star.element.classList.remove('star-glow');
-            });
-            const lines = document.querySelectorAll('.constellation-line');
-            lines.forEach(line => {
-                line.classList.remove('line-glow');
-                line.style.opacity = 0; // Hide the line
-            });
-
-            // Find connected stars (stars connected to the clicked star)
-            const connectedStars = findConnectedStars(clickedStar);
-
-            // Highlight connected stars
-            connectedStars.forEach(star => {
-                const starElement = userStars.find(s => s.x === star.x && s.y === star.y).element;
-                starElement.classList.add('star-glow');
-            });
-
-            // Highlight lines connecting these stars
-            highlightLines(clickedStar, connectedStars);
-        }
-
-        function findConnectedStars(clickedStar) {
-            // Find stars directly connected to the clicked star
-            const connected = connectedLines.filter(line => {
-                return (line.star1.x === clickedStar.x && line.star1.y === clickedStar.y) ||
-                       (line.star2.x === clickedStar.x && line.star2.y === clickedStar.y);
-            }).map(line => {
-                return line.star1.x === clickedStar.x && line.star1.y === clickedStar.y ? line.star2 : line.star1;
-            });
-        
-            // Add the clicked star itself to the list of connected stars
-            connected.push(clickedStar);
-        
-            return connected;
-        }
-        
-        function highlightLines(clickedStar, connectedStars) {
-            connectedStars.forEach(star => {
-                const lineId = `line-${clickedStar.x}-${clickedStar.y}-${star.x}-${star.y}`;
-                const lineId2 = `line-${star.x}-${star.y}-${clickedStar.x}-${clickedStar.y}`;
-                const lineElement = document.getElementById(lineId) || document.getElementById(lineId2);
-                if (lineElement) {
-                    lineElement.classList.add('line-glow');
-                    lineElement.style.opacity = 1; // Make the line visible
-                }
-            });
-        }
-        
-        // Modify findClickedStar to return the star object with its element reference
-        function findClickedStar(x, y) {
-            for (let i = 0; i < userStars.length; i++) {
-                const star = userStars[i];
-                const distance = Math.sqrt((x - star.x) ** 2 + (y - star.y) ** 2);
-                if (distance <= 10) {
-                    return star;
-                }
-            }
-            return null;
-        }
-        
-        let connectedLines = [];
-        // Draw Line Tool Logic
-        let lineDrawingMode = false;
-        let lastStarClicked = null;
-
-        const drawLineButton = document.getElementById("drawLine");
-        drawLineButton.addEventListener("click", () => {
-            lineDrawingMode = !lineDrawingMode;
-            if (lineDrawingMode) {
-                drawLineButton.style.backgroundColor = "#ff3399";
-                drawLineButton.textContent = "Connecting...";
-            } else {
-                drawLineButton.style.backgroundColor = "#e60073";
-                drawLineButton.textContent = "Connect Stars";
-                lastStarClicked = null;
-            }
-            canvas.style.cursor = lineDrawingMode ? "crosshair" : "default";
-        });
-
-        canvas.addEventListener("click", (e) => {
-            if (lineDrawingMode) {
-                const rect = canvas.getBoundingClientRect();
-                const x = e.clientX - rect.left;
-                const y = e.clientY - rect.top;
-        
-                const clickedStar = findClickedStar(x, y);
-                if (clickedStar) {
-                    if (lastStarClicked && lastStarClicked !== clickedStar) {
-                        // Draw a line between the stars
-                        drawLineBetweenStars(lastStarClicked, clickedStar);
-                        lastStarClicked = null; // Reset last clicked star
-                    } else {
-                        // Store the clicked star
-                        lastStarClicked = clickedStar;
-                    }
-                }
-            }
-        });
-
-        // Modify drawLineBetweenStars to use color cycling
-        function drawLineBetweenStars(star1, star2) {
-            const lineId = `line-${star1.x}-${star1.y}-${star2.x}-${star2.y}`;
-            const existingLine = document.getElementById(lineId);
-        
-            if (existingLine) {
-                existingLine.remove();
-                connectedLines = connectedLines.filter(line => line.id !== lineId);
-            } else {
-                const lineCanvas = document.createElement('canvas');
-                lineCanvas.width = window.innerWidth;
-                lineCanvas.height = window.innerHeight;
-                lineCanvas.style.position = 'absolute';
-                lineCanvas.style.top = '0';
-                lineCanvas.style.left = '0';
-                lineCanvas.style.zIndex = '15';
-                lineCanvas.id = lineId;
-                lineCanvas.className = 'constellation-line';
-        
-                document.getElementById('interactive-area').appendChild(lineCanvas);
-                const lineCtx = lineCanvas.getContext('2d');
-        
-                lineCtx.beginPath();
-                lineCtx.moveTo(star1.x, star1.y);
-                lineCtx.lineTo(star2.x, star2.y);
-                lineCtx.strokeStyle = 'white';
-                lineCtx.lineWidth = 3;
-                lineCtx.shadowColor = star1.color;
-                lineCtx.shadowBlur = 10;
-                lineCtx.stroke();
-                lineCtx.closePath();
-                lineCtx.shadowColor = 'transparent';
-                lineCtx.shadowBlur = 0;
-        
-                connectedLines.push({ id: lineId, star1: star1, star2: star2 });
-            }
-        }        
-
-        // Shooting Star Animation
-        // Function to play a sound effect
-        function playSound(soundId) {
-            const sound = document.getElementById(soundId);
-            if (sound) {
-                sound.currentTime = 0; // Reset sound to start
-                sound.play();
-            }
-        }
-
-        function createShootingStar() {
-            const shootingStar = document.createElement('div');
-            shootingStar.className = 'shooting-star';
-            shootingStar.style.left = `${Math.random() * window.innerWidth}px`;
-            shootingStar.style.top = `${Math.random() * window.innerHeight / 2}px`;
-
-            document.getElementById('interactive-area').appendChild(shootingStar);
-
-            shootingStar.addEventListener('click', (event) => {
-                event.stopPropagation();
-                const rect = shootingStar.getBoundingClientRect();
-                const x = event.clientX - rect.left + shootingStar.offsetLeft;
-                const y = event.clientY - rect.top + shootingStar.offsetTop;
-                const secretWish = prompt("Make a secret wish upon this shooting star!");
-                if (secretWish && secretWish.trim() !== "") {
-                    // Display the wish text
-                    const wishText = document.createElement('div');
-                    wishText.className = 'wish-text';
-                    wishText.style.left = `${x}px`; // Position based on star's position
-                    wishText.style.top = `${y}px`;  // Position based on star's position
-                    wishText.textContent = secretWish;
-                    document.getElementById('interactive-area').appendChild(wishText);
-
-                    // Fade out the wish text after a few seconds
-                    setTimeout(() => {
-                        wishText.style.opacity = 0;
-                        setTimeout(() => wishText.remove(), 2000); // Remove after fade out
-                    }, 3000);
-
-                    wishCounter++; // Increment the wish counter
-                }
-                shootingStar.remove(); // Remove the shooting star after being clicked
-            });
-
-            setTimeout(() => {
-                shootingStar.remove();
-            }, 2000); // Duration of the animation
-        }
-
-        setInterval(createShootingStar, 5000); // Create a shooting star every 5 seconds
-
-        // Initialize background music to start playing automatically
-        document.addEventListener('DOMContentLoaded', (event) => {
-            backgroundMusic.play().catch(e => {
-                // Autoplay was prevented, show a message or handle it accordingly
-                console.error("Autoplay was prevented:", e);
-            });
-        });
-        
-
-        // Share Functionality
-        document.getElementById("shareSky").addEventListener("click", function() {
-            html2canvas(document.body, {
-                backgroundColor: null,
-                width: window.innerWidth,
-                height: window.innerHeight,
-                scrollX: -window.scrollX,
-                scrollY: -window.scrollY,
-                windowWidth: document.documentElement.offsetWidth,
-                windowHeight: document.documentElement.offsetHeight,
-            }).then(canvas => {
-                // Convert the canvas to a data URL
-                const imageDataURL = canvas.toDataURL("image/png");
-
-                // Function to trigger download (IE11)
-                const triggerDownload = (imgURI) => {
-                  const evt = new MouseEvent('click', {
-                    view: window,
-                    bubbles: false,
-                    cancelable: true
-                  });
-
-                  const a = document.createElement('a');
-                  a.setAttribute('download', 'MyConstellation.png');
-                  a.setAttribute('href', imgURI);
-                  a.setAttribute('target', '_blank');
-                  a.dispatchEvent(evt);
-                }
-
-                // Check if the browser is IE11
-                const isIE11 = !!window.MSInputMethodContext && !!document.documentMode;
-                if (isIE11) {
-                  // IE11 doesn't support data URI links for downloading
-                  // Fallback method (e.g., using Blob)
-                  const blob = dataURLtoBlob(imageDataURL);
-                  window.navigator.msSaveBlob(blob, 'MyConstellation.png');
-                } else {
-                  triggerDownload(imageDataURL);
-                }
-            });
-        });
-
-        // Function to convert data URL to Blob (for IE11)
-        const dataURLtoBlob = (dataurl) => {
-          const arr = dataurl.split(',');
-          const mime = arr[0].match(/:(.*?);/)[1];
-          const bstr = atob(arr[1]);
-          let n = bstr.length;
-          const u8arr = new Uint8Array(n);
-          while (n--) {
-            u8arr[n] = bstr.charCodeAt(n);
-          }
-          return new Blob([u8arr], { type: mime });
-        }
-
-        window.onload = function() {
-            // This is intentional left empty as of now
-        };
+        // Start the animation
+        animate();
     </script>
-    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/dom-to-image/2.6.0/dom-to-image.min.js"></script>
 </body>
 </html>
