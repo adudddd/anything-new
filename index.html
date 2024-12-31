@@ -85,8 +85,8 @@
         /* Firework Particle Styles */
         .firework-particle {
             position: absolute;
-            width: 8px;
-            height: 8px;
+            width: 4px;
+            height: 4px;
             border-radius: 50%;
             background-color: #fff;
             opacity: 1;
@@ -128,41 +128,26 @@
             confetti.style.left = `${x}px`;
             confetti.style.top = `${y}px`;
             document.body.appendChild(confetti);
-        
-            // Randomize the animation duration and delay for each particle
-            const animationDuration = 3 + Math.random() * 3; // Duration between 3 and 6 seconds
-            const animationDelay = Math.random() * 2; // Delay up to 2 seconds
+
+            const animationDuration = 3 + Math.random() * 3;
+            const animationDelay = Math.random() * 2;
             confetti.style.animation = `confetti-fall ${animationDuration}s linear ${animationDelay}s forwards`;
-        
-            // Remove the confetti after it falls
+
             setTimeout(() => confetti.remove(), (animationDuration + animationDelay) * 1000);
         }
 
-        // Create confetti shower using mouse position
-        function createConfettiShower(x, y) {
+        // Create confetti shower within a specified area
+        function createConfettiShower(areaCenterX, areaCenterY, areaWidth, areaHeight) {
             const confettiColors = ['#f00', '#0f0', '#00f', '#ff0', '#f0f', '#00f'];
             for (let i = 0; i < 50; i++) {
-                const xOffset = x + (Math.random() - 0.5) * 200;
-                const yOffset = y + (Math.random() - 0.5) * 200;
-                createConfettiParticle(xOffset, yOffset, confettiColors[i % confettiColors.length]);
+                const x = areaCenterX + (Math.random() - 0.5) * areaWidth;
+                const y = areaCenterY + (Math.random() - 0.5) * areaHeight;
+                createConfettiParticle(x, y, confettiColors[i % confettiColors.length]);
             }
         }
 
-        // Automatic Confetti and Firework for the first 15 seconds
-        const startTime = Date.now();
-        const autoConfettiInterval = setInterval(() => {
-            const elapsed = Date.now() - startTime;
-            if (elapsed >= 15000) {
-                clearInterval(autoConfettiInterval);
-            } else {
-                const x = Math.random() * canvas.width;
-                const y = Math.random() * canvas.height;
-                createConfettiShower(x, y);
-            }
-        }, 3000); // Adjust the frequency of confetti showers here
-
         // Function to create a firework particle
-        function createFireworkParticle(x, y, color) {
+        function createFireworkParticle(x, y, color, vx, vy) {
             const particle = document.createElement('div');
             particle.classList.add('firework-particle');
             particle.style.backgroundColor = color;
@@ -170,45 +155,57 @@
             particle.style.top = `${y}px`;
             document.body.appendChild(particle);
         
-            // Randomize explosion velocity
-            const vx = (Math.random() - 0.5) * 6;
-            const vy = (Math.random() - 0.5) * 6;
-        
-            // Animate the particle
-            let life = 100;
+            // Use provided vx and vy for particle movement
+            let life = 150;
             const particleAnimation = setInterval(() => {
-                life -= 2;
+                life -= 1;
                 particle.style.left = `${parseFloat(particle.style.left) + vx}px`;
                 particle.style.top = `${parseFloat(particle.style.top) + vy}px`;
+                particle.style.opacity = life / 100;
         
                 if (life <= 0) {
                     clearInterval(particleAnimation);
                     particle.remove();
                 }
-            }, 20); // Update particle position every 20ms
+            }, 1000 / 60); // Update particle position at 60 FPS
         }
+        
 
-        // Automatic Firework Creation Function
+        // Modified Automatic Firework Creation Function
         function createAutomaticFirework() {
             const x = Math.random() * canvas.width;
-            const y = Math.random() * (canvas.height * 0.5); // Firework appears in top half of screen
-            const numParticles = 50 + Math.random() * 50; // Number of particles in a firework
-        
+            const y = Math.random() * (canvas.height * 0.5);
+            const numParticles = 50 + Math.random() * 50;
+            const baseVX = (Math.random() - 0.5) * 2;
+            const baseVY = -(Math.random() * 4 + 2);
+
             for (let i = 0; i < numParticles; i++) {
+                const angle = Math.random() * 2 * Math.PI;
+                const speedMultiplier = Math.random() * 3;
+                const vx = baseVX + Math.cos(angle) * speedMultiplier;
+                const vy = baseVY + Math.sin(angle) * speedMultiplier;
                 const color = `hsl(${Math.random() * 360}, 100%, 50%)`;
-                createFireworkParticle(x, y, color);
+                createFireworkParticle(x, y, color, vx, vy);
             }
         }
 
-        // Create Automatic Fireworks for the First 15 Seconds
-        const autoFireworkInterval = setInterval(() => {
+        const startTime = Date.now();
+
+        // Create Automatic Fireworks and Confetti for the First 15 Seconds
+        const autoInterval = setInterval(() => {
             const elapsed = Date.now() - startTime;
             if (elapsed >= 15000) {
-                clearInterval(autoFireworkInterval);
+                clearInterval(autoInterval);
             } else {
                 createAutomaticFirework();
+                // Define the area where confetti should rain (e.g., top half of the screen)
+                const areaCenterX = canvas.width / 2;
+                const areaCenterY = canvas.height / 4;
+                const areaWidth = canvas.width;
+                const areaHeight = canvas.height / 2;
+                createConfettiShower(areaCenterX, areaCenterY, areaWidth, areaHeight);
             }
-        }, 500); // Adjust frequency of fireworks
+        }, 700);
 
         // Function to create and animate emojis
         const emojis = ['❤️', '💖', '✨', '🌟', '😍', '🥰'];
@@ -227,10 +224,9 @@
             emoji.style.top = `${y}px`;
             document.body.appendChild(emoji);
 
-            // Animate and remove emoji
             setTimeout(() => {
                 emoji.style.opacity = '0';
-                emoji.style.top = `${parseFloat(emoji.style.top) - 50}px`; // Move upward
+                emoji.style.top = `${parseFloat(emoji.style.top) - 50}px`;
             }, 20);
 
             setTimeout(() => emoji.remove(), 2000);
@@ -238,13 +234,6 @@
 
         // Event listener for mouse interaction
         canvas.addEventListener('mousemove', (e) => {
-            // Confetti shower around the mouse position
-            createConfettiShower(e.clientX, e.clientY);
-
-            // Create firework particles on mouse move
-            const fireworkColor = `hsl(${Math.random() * 360}, 100%, 50%)`;
-            createFireworkParticle(e.clientX, e.clientY, fireworkColor);
-
             // Create changing emojis
             createEmoji(e.clientX, e.clientY);
         });
