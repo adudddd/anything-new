@@ -43,16 +43,13 @@
 
         /* Confetti Styles */
         .confetti {
-            position: fixed;
-            left: 50%;
-            top: -10px; /* Start above the viewport */
+            position: absolute;  /* Changed to absolute */
             width: 10px;
             height: 16px;
             background-color: #f00;
-            transform: translateX(-50%);
             opacity: 0;
-            z-index: 20; /* Make it fall in front of the stars */
-            pointer-events: none; /* Allow interaction with the sky */
+            z-index: 20;
+            pointer-events: none;
         }
 
         .confetti.show {
@@ -72,7 +69,7 @@
                 opacity: 0.5;
             }
             100% {
-                top: 100vh; /* Fall to bottom of the viewport */
+                top: 100vh;
                 opacity: 0;
             }
         }
@@ -125,6 +122,43 @@
         .heart:after {
             top: 0;
             left: 7.5px;
+        }
+
+        /* Rainbow Trail Styles */
+        .trail {
+            position: absolute;
+            height: 6px;
+            border-radius: 3px;
+            background: linear-gradient(to right, red, orange, yellow, green, blue, indigo, violet);
+            opacity: 0.8;
+            z-index: 10;
+            pointer-events: none;
+        }
+
+        @keyframes trail-fade {
+            to { 
+                opacity: 0; 
+                width: 0;
+                height: 0;    
+            }
+        }
+
+        /* Sparkling Starburst Styles */
+        .starburst {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background-color: white;
+            border-radius: 50%;
+            box-shadow: 0 0 10px 2px #fff;
+            z-index: 5;
+            pointer-events: none;
+            animation: burst-fade 1s ease-out;
+        }
+        
+        @keyframes burst-fade {
+            from { opacity: 1; }
+            to { opacity: 0; transform: scale(2); }
         }
     </style>
     <link href="https://fonts.googleapis.com/css2?family=Cedarville+Cursive&family=Dancing+Script&display=swap" rel="stylesheet">
@@ -208,17 +242,63 @@
             heart.style.top = `${y}px`;
             heart.style.transform = `rotate(-45deg)`;
             document.body.appendChild(heart);
-            
+
             // Optional: Remove the heart after animation ends
             setTimeout(() => heart.remove(), 1500); // 1500ms matches animation duration
         }
 
+        // Function to create a rainbow trail element
+        function createTrail(x, y) {
+            const trail = document.createElement('div');
+            trail.classList.add('trail');
+            trail.style.left = `${x}px`;
+            trail.style.top = `${y}px`;
+            const length = 20 + Math.random() * 20; // Random length
+            const angle = Math.random() * 360;
+            trail.style.width = `${length}px`;
+            trail.style.transform = `rotate(${angle}deg)`;
+            document.body.appendChild(trail);
+
+            // Remove the trail after it fades
+            trail.addEventListener('animationend', () => {
+                trail.remove();
+            });
+            trail.style.animation = 'trail-fade 1s ease-out forwards';
+        }
+
+        // Function to create a sparkling starburst
+        function createStarburst(x, y) {
+            const starburst = document.createElement('div');
+            starburst.classList.add('starburst');
+            starburst.style.left = `${x}px`;
+            starburst.style.top = `${y}px`;
+            document.body.appendChild(starburst);
+
+            // Remove the starburst after animation ends
+            setTimeout(() => {
+                starburst.remove();
+            }, 1000);
+        }
+
         // Event listener for mouse interaction (firework creation)
         canvas.addEventListener('mousemove', (e) => {
-            createFirework(e.clientX, e.clientY, 20 + Math.random() * 10);
-
-            // Create hearts on mouse move
-            createHeart(e.clientX, e.clientY);
+            // Create firework with 50% chance to make it less frequent
+            if (Math.random() < 0.5) {
+                createFirework(e.clientX, e.clientY, 20 + Math.random() * 10);
+            }
+            
+            // Reduced heart creation for a more balanced effect
+            if (Math.random() < 0.7) {
+                createHeart(e.clientX, e.clientY);
+            }
+            
+            // Reduced trail creation for a less overwhelming effect
+            if (Math.random() < 0.6) {
+                createTrail(e.clientX, e.clientY);
+            }
+            
+            // Add starbursts on mousemove
+            createStarburst(e.clientX, e.clientY);
         });
 
         // Animation loop
@@ -239,24 +319,37 @@
         }
 
         // Function to create a confetti particle
-        function createConfettiParticle(color) {
+        function createConfettiParticle(x, y, color) {
             const confetti = document.createElement('div');
             confetti.classList.add('confetti');
             confetti.style.backgroundColor = color;
-            confetti.style.left = `${Math.random() * 100}vw`; // Randomly across viewport
-            confetti.style.top = '-10px';
+            confetti.style.left = `${x}px`;
+            confetti.style.top = `${y}px`;
             document.body.appendChild(confetti);
-            setTimeout(() => confetti.remove(), 5000); // Remove after animation
+        
+            // Randomize the animation duration and delay for each particle
+            const animationDuration = 3 + Math.random() * 3; // Duration between 3 and 6 seconds
+            const animationDelay = Math.random() * 2; // Delay up to 2 seconds
+            confetti.style.animation = `confetti-fall ${animationDuration}s linear ${animationDelay}s forwards`;
+        
+            // Remove the confetti after it falls
+            setTimeout(() => confetti.remove(), (animationDuration + animationDelay) * 1000);
+        }
+
+        // Create confetti shower using mouse position
+        function createConfettiShower(x, y) {
+            const confettiColors = ['#f00', '#0f0', '#00f', '#ff0', '#f0f', '#00f']; // Example colors
+            for (let i = 0; i < 50; i++) { // Reduced number of confetti particles for performance
+                const xOffset = x + (Math.random() - 0.5) * 400; // Spread around the mouse
+                const yOffset = y + (Math.random() - 0.5) * 400; // Spread above and below
+                createConfettiParticle(xOffset, yOffset, confettiColors[i % confettiColors.length]);
+            }
         }
 
         // Trigger the confetti shower
-        function triggerConfetti() {
-            const confettiColors = ['#f00', '#0f0', '#00f', '#ff0', '#f0f', '#0ff']; // Example colors
-            for (let i = 0; i < 200; i++) {
-                // Create a bunch of confetti particles
-                createConfettiParticle(confettiColors[i % confettiColors.length]);
-            }
-        }
+        canvas.addEventListener('click', (e) => {
+            createConfettiShower(e.clientX, e.clientY);
+        });
 
         // Show confetti at the beginning
         triggerConfetti();
