@@ -75,24 +75,21 @@
             font-size: 1.6rem;
         }
 
-        .color-picker {
-            -webkit-appearance: none;
-            -moz-appearance: none;
-            appearance: none;
-            width: 40px;
-            height: 40px;
-            border: 2px solid #fff;
-            border-radius: 8px;
-            cursor: pointer;
-            background-color: transparent;
-            padding: 0;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.4);
-            margin: 0 5px;
-        }
-
         /* (Rest of your existing CSS styles) */
-
-        /* ... */
+        .color-picker {
+          -webkit-appearance: none;
+          -moz-appearance: none;
+          appearance: none;
+          width: 40px;
+          height: 40px;
+          border: 2px solid #fff;
+          border-radius: 8px;
+          cursor: pointer;
+          background-color: transparent;
+          padding: 0;
+          box-shadow: 0 2px 5px rgba(0, 0, 0, 0.4);
+          margin: 0 5px;
+        }
 
         .color-picker::-webkit-color-swatch-wrapper {
           padding: 0;
@@ -150,20 +147,21 @@
             background-color: #ff3399;
         }
 
-        /* Styles for specific constellations based on zodiac sign */
-        .constellation-aries {
-            stroke: #ffcc00;
-            stroke-width: 3;
-            filter: drop-shadow(0 0 5px #ffcc00);
-        }
-
-        /* ... (Add similar styles for other zodiac signs with unique colors and shadow) */
+        /* ... */
 
         .highlight {
             stroke: #ff6b6b !important;
             stroke-width: 4 !important;
             filter: drop-shadow(0 0 8px #ff6b6b) !important;
         }
+
+        .constellation-image {
+            position: absolute;
+            opacity: 0.7;
+            z-index: 4;
+            pointer-events: none; /* Prevent image from interfering with canvas clicks */
+        }
+
     </style>
     <link href="https://fonts.googleapis.com/css2?family=Cedarville+Cursive&family=Dancing+Script&display=swap" rel="stylesheet">
 </head>
@@ -179,11 +177,17 @@
         <div class="input-container">
             <input type="date" id="birthDate" required>
             <select id="birthLocation">
-                <option value="london">London</option>
-                <option value="newyork">New York</option>
-                <option value="sydney">Sydney</option>
-                <option value="tokyo">Tokyo</option>
-                <!-- Add more locations as needed -->
+                <option value="mumbai">Mumbai</option>
+                <option value="delhi">Delhi</option>
+                <option value="bangalore">Bangalore</option>
+                <option value="chennai">Chennai</option>
+                <option value="hyderabad">Hyderabad</option>
+                <option value="kolkata">Kolkata</option>
+                <option value="pune">Pune</option>
+                <option value="ahmedabad">Ahmedabad</option>
+                <option value="jaipur">Jaipur</option>
+                <option value="lucknow">Lucknow</option>
+                <!-- Add more Indian locations as needed -->
             </select>
             <button id="showZodiac">Show My Zodiac</button>
         </div>
@@ -191,6 +195,7 @@
         <canvas id="star-canvas"></canvas>
         <canvas id="constellation-canvas"></canvas>
         <canvas id="drawingCanvas"></canvas>
+        <img id="constellationImage" class="constellation-image" src="" alt="Constellation">
     </div>
 
     <audio id="backgroundMusic" loop>
@@ -219,7 +224,6 @@
     </div>
 
     <script>
-        // ... (Your existing JavaScript code) ...
         const countdownDisplay = document.getElementById("countdown");
 
         function updateCountdown() {
@@ -311,67 +315,69 @@
         // Initialize the stars
         generateStars(100);
 
+        const constellationImage = document.getElementById('constellationImage');
+
         // Enhanced Zodiac Constellation Drawing
         const zodiacData = {
             Aries: {
                 stars: [[100, 200], [150, 250], [180, 230]],
                 lines: [[0, 1], [1, 2]],
-                styleClass: 'constellation-aries'
+                imageUrl: 'images/aries.png' // Add image URL for Aries
             },
             Taurus: {
                 stars: [[300, 100], [350, 150], [380, 130], [420, 180]],
                 lines: [[0, 1], [1, 2], [2, 3]],
-                styleClass: 'constellation-taurus'
+                imageUrl: 'images/taurus.png' // Add image URL for Taurus
             },
             Gemini: {
                 stars: [[500, 200], [550, 250], [580, 230], [620, 280]],
                 lines: [[0, 1], [1, 2], [2, 3]],
-                styleClass: 'constellation-gemini'
+                imageUrl: 'images/gemini.png' // Add image URL for Gemini
             },
             Cancer: {
                 stars: [[100, 400], [150, 350], [180, 370], [220, 320]],
                 lines: [[0, 1], [1, 2], [2, 3]],
-                styleClass: 'constellation-cancer'
+                imageUrl: 'images/cancer.png' // Add image URL for Cancer
             },
             Leo: {
                 stars: [[300, 500], [350, 450], [380, 470], [420, 420]],
                 lines: [[0, 1], [1, 2], [2, 3]],
-                styleClass: 'constellation-leo'
+                imageUrl: 'images/leo.png' // Add image URL for Leo
             },
             Virgo: {
                 stars: [[500, 600], [550, 550], [580, 570], [620, 520]],
                 lines: [[0, 1], [1, 2], [2, 3]],
-                styleClass: 'constellation-virgo'
+                imageUrl: 'images/virgo.png' // Add image URL for Virgo
             },
             Libra: {
                 stars: [[700, 200], [750, 250], [780, 230], [820, 280]],
                 lines: [[0, 1], [1, 2], [2, 3]],
-                styleClass: 'constellation-libra'
+                imageUrl: 'images/libra.png' // Add image URL for Libra
             },
             Scorpio: {
                 stars: [[900, 100], [950, 150], [980, 130], [1020, 180]],
                 lines: [[0, 1], [1, 2], [2, 3]],
-                styleClass: 'constellation-scorpio'
+                imageUrl: 'images/scorpio.png' // Add image URL for Scorpio
             },
             Sagittarius: {
                 stars: [[1100, 200], [1150, 250], [1180, 230], [1220, 280]],
                 lines: [[0, 1], [1, 2], [2, 3]],
-                styleClass: 'constellation-sagittarius'
+                imageUrl: 'images/sagittarius.png' // Add image URL for Sagittarius
             },
             Capricorn: {
                 stars: [[700, 400], [750, 350], [780, 370], [820, 320]],
                 lines: [[0, 1], [1, 2], [2, 3]],
-                styleClass: 'constellation-capricorn'
+                imageUrl: 'images/capricorn.png' // Add image URL for Capricorn
             },
             Aquarius: {
                 stars: [[900, 500], [950, 450], [980, 470], [1020, 420]],
                 lines: [[0, 1], [1, 2], [2, 3]],
-                styleClass: 'constellation-aquarius'
+                imageUrl: 'images/aquarius.png' // Add image URL for Aquarius
             },
             Pisces: {
                 stars: [[1100, 600], [1150, 550], [1180, 570], [1220, 520]],
                 lines: [[0, 1], [1, 2], [2, 3]],
-                styleClass: 'constellation-pisces'
+                imageUrl: 'images/pisces.png' // Add image URL for Pisces
             }
             // Add data for other zodiac signs
         };
@@ -380,6 +386,39 @@
         function updateZodiacConstellation(birthDate, location) {
             const zodiacSign = getZodiacSign(birthDate);
             drawZodiacConstellation(zodiacSign);
+            showConstellationImage(zodiacSign);
+        }
+
+        // Function to show the image of the zodiac constellation
+        function showConstellationImage(zodiacSign) {
+            const img = document.getElementById('constellationImage');
+            if (zodiacData[zodiacSign] && zodiacData[zodiacSign].imageUrl) {
+                img.src = zodiacData[zodiacSign].imageUrl;
+                img.style.display = 'block';
+
+                // Get constellation canvas for positioning
+                const zodiacCanvas = document.getElementById('zodiac-canvas');
+
+                // Position the image based on the constellation
+                const constellation = zodiacData[zodiacSign];
+                const scaleFactor = Math.min(zodiacCanvas.width, zodiacCanvas.height) / 500; // Same as in drawZodiacConstellation
+
+                // Calculate average position of stars for central positioning
+                let avgX = 0, avgY = 0;
+                constellation.stars.forEach(star => {
+                    avgX += star[0] * scaleFactor;
+                    avgY += star[1] * scaleFactor;
+                });
+                avgX /= constellation.stars.length;
+                avgY /= constellation.stars.length;
+
+                // Set image position (adjust as needed)
+                img.style.left = `${avgX - img.width / 2}px`;
+                img.style.top = `${avgY - img.height / 2}px`;
+
+            } else {
+                img.style.display = 'none';
+            }
         }
 
         // Event listener for the 'Show My Zodiac' button
@@ -665,7 +704,7 @@
         
         function hideDreamText() {
             for (let dreamText of dreamTexts) {
-                dreamText.text.classList.remove('visible');
+                                dreamText.text.classList.remove('visible');
             }
         }
 
@@ -715,7 +754,7 @@
         function highlightLines(clickedStar, connectedStars) {
             connectedStars.forEach(star => {
                 const lineId = `line-${clickedStar.x}-${clickedStar.y}-${star.x}-${star.y}`;
-                            const lineId2 = `line-${star.x}-${star.y}-${clickedStar.x}-${clickedStar.y}`;
+                const lineId2 = `line-${star.x}-${star.y}-${clickedStar.x}-${clickedStar.y}`;
                 const lineElement = document.getElementById(lineId) || document.getElementById(lineId2);
                 if (lineElement) {
                     lineElement.classList.add('line-glow');
