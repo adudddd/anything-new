@@ -88,11 +88,74 @@
                 opacity: 0;
             }
         }
+
+        /* Happy New Year Message Styling */
+        .new-year-message {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            font-family: 'Cedarville Cursive', cursive; /* Or try 'Dancing Script' or any other cursive-style font */
+            font-size: 4rem; /* Adjust size as needed */
+            color: #FFD700; /* A festive gold color */
+            text-shadow: 0 0 10px #fff, 0 0 20px #fff, 0 0 30px #ffd700, 0 0 40px #ffd700; /* Multiple shadows for a glow effect */
+            z-index: 15; /* Above the stars and confetti, but below popups */
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .new-year-message.show {
+            animation: show-message 6s ease-in-out;
+        }
+
+        @keyframes show-message {
+            0% { opacity: 0; }
+            50% { opacity: 1; } /* Fully visible at midpoint */
+            75% { transform: translate(-50%, -50%) scale(1.2); } /* Optional: Grow in size */
+            100% { opacity: 0; transform: translate(-50%, -50%) scale(1); } /* Fade out and return to normal size */
+        }
+
+        /* Funky Heart Styles */
+        @keyframes heartbeat {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.3); }
+            100% { transform: scale(1); }
+        }
+
+        .heart {
+            position: absolute;
+            width: 15px;
+            height: 15px;
+            background-color: red;
+            animation: heartbeat 1.5s infinite;
+        }
+
+        .heart:before,
+        .heart:after {
+            content: '';
+            position: absolute;
+            width: 15px;
+            height: 15px;
+            background-color: red;
+            border-radius: 50%;
+        }
+
+        .heart:before {
+            top: -7.5px;
+            left: 0;
+        }
+
+        .heart:after {
+            top: 0;
+            left: 7.5px;
+        }
     </style>
+    <link href="https://fonts.googleapis.com/css2?family=Cedarville+Cursive&family=Dancing+Script&display=swap" rel="stylesheet">
 </head>
 <body>
     <div id="countdown"></div>
     <canvas id="skyCanvas"></canvas>
+    <div id="newYearMessage" class="new-year-message">Happy New Year Muddu</div>
 
     <script>
         const canvas = document.getElementById('skyCanvas');
@@ -161,9 +224,25 @@
             particle.size *= 0.99; // Make the particle shrink over time
         }
 
+        // Create a new heart element
+        function createHeart(x, y) {
+            const heart = document.createElement('div');
+            heart.classList.add('heart');
+            heart.style.left = `${x}px`;
+            heart.style.top = `${y}px`;
+            heart.style.transform = `rotate(-45deg)`;
+            document.body.appendChild(heart);
+            
+            // Optional: Remove the heart after animation ends
+            setTimeout(() => heart.remove(), 1500); // 3000ms matches animation duration
+        }
+
         // Event listener for mouse interaction (firework creation)
         canvas.addEventListener('mousemove', (e) => {
             createFirework(e.clientX, e.clientY, 20 + Math.random() * 10);
+
+            // Create hearts on mouse move
+            createHeart(e.clientX, e.clientY);
         });
 
         // Animation loop
@@ -210,8 +289,9 @@
             countdownDisplay.textContent = `Time until New Year: ${days}d ${hours}h ${minutes}m ${seconds}s`;
 
             if (diff <= 0) {
-                countdownDisplay.textContent = "Happy New Year!";
+                countdownDisplay.textContent = "";
                 triggerConfetti();
+                showNewYearMessage();
                 clearInterval(countdownInterval);
             }
         }
@@ -223,6 +303,12 @@
                 // Create a bunch of confetti particles
                 createConfettiParticle(confettiColors[i % confettiColors.length]);
             }
+        }
+
+        // Function to show the "Happy New Year Muddu" message
+        function showNewYearMessage() {
+            const message = document.getElementById('newYearMessage');
+            message.classList.add('show');
         }
 
         const countdownInterval = setInterval(updateCountdown, 1000);
