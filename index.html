@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Interactive Fireworks Sky</title>
+    <title>Happy New Year!</title>
     <style>
         body {
             margin: 0;
@@ -23,18 +23,6 @@
             width: 100%;
             height: 100%;
             z-index: 1;
-        }
-
-        #countdown {
-            position: absolute;
-            top: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            font-family: 'Arial', sans-serif;
-            color: #ffcc5c;
-            font-size: 2rem;
-            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.8);
-            z-index: 10;
         }
 
         @keyframes twinkle {
@@ -100,19 +88,8 @@
             color: #FFD700; /* A festive gold color */
             text-shadow: 0 0 10px #fff, 0 0 20px #fff, 0 0 30px #ffd700, 0 0 40px #ffd700; /* Multiple shadows for a glow effect */
             z-index: 15; /* Above the stars and confetti, but below popups */
-            opacity: 0;
+            opacity: 1;
             pointer-events: none;
-        }
-
-        .new-year-message.show {
-            animation: show-message 6s ease-in-out;
-        }
-
-        @keyframes show-message {
-            0% { opacity: 0; }
-            50% { opacity: 1; } /* Fully visible at midpoint */
-            75% { transform: translate(-50%, -50%) scale(1.2); } /* Optional: Grow in size */
-            100% { opacity: 0; transform: translate(-50%, -50%) scale(1); } /* Fade out and return to normal size */
         }
 
         /* Funky Heart Styles */
@@ -153,7 +130,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Cedarville+Cursive&family=Dancing+Script&display=swap" rel="stylesheet">
 </head>
 <body>
-    <div id="countdown"></div>
     <canvas id="skyCanvas"></canvas>
     <div id="newYearMessage" class="new-year-message">Happy New Year Muddu</div>
 
@@ -234,7 +210,7 @@
             document.body.appendChild(heart);
             
             // Optional: Remove the heart after animation ends
-            setTimeout(() => heart.remove(), 1500); // 3000ms matches animation duration
+            setTimeout(() => heart.remove(), 1500); // 1500ms matches animation duration
         }
 
         // Event listener for mouse interaction (firework creation)
@@ -273,29 +249,6 @@
             setTimeout(() => confetti.remove(), 5000); // Remove after animation
         }
 
-        // New Year countdown
-        const countdownDisplay = document.getElementById("countdown");
-
-        function updateCountdown() {
-            const now = new Date();
-            const newYear = new Date(now.getFullYear() + 1, 0, 1);
-            const diff = newYear - now;
-
-            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-            const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-            const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-            const seconds = Math.floor((diff % (1000 * 60)) / 1000);
-
-            countdownDisplay.textContent = `Time until New Year: ${days}d ${hours}h ${minutes}m ${seconds}s`;
-
-            if (diff <= 0) {
-                countdownDisplay.textContent = "";
-                triggerConfetti();
-                showNewYearMessage();
-                clearInterval(countdownInterval);
-            }
-        }
-
         // Trigger the confetti shower
         function triggerConfetti() {
             const confettiColors = ['#f00', '#0f0', '#00f', '#ff0', '#f0f', '#0ff']; // Example colors
@@ -305,14 +258,8 @@
             }
         }
 
-        // Function to show the "Happy New Year Muddu" message
-        function showNewYearMessage() {
-            const message = document.getElementById('newYearMessage');
-            message.classList.add('show');
-        }
-
-        const countdownInterval = setInterval(updateCountdown, 1000);
-        updateCountdown();
+        // Show confetti at the beginning
+        triggerConfetti();
 
         // Start the animation
         animate();
