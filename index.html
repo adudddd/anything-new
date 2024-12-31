@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
+    <meta charset="UTF-8">
     <title>Our Sky of Dreams</title>
     <style>
         /* Styling for the night sky and interactive elements */
@@ -11,7 +11,7 @@
             background: linear-gradient(to bottom, #19073f, #331e57);
             font-family: 'Arial', sans-serif;
             color: #fff;
-            overflow: hidden; /* Prevents scrollbars due to the star field */
+            overflow: hidden;
         }
 
         .header-container {
@@ -36,16 +36,16 @@
             text-shadow: 0 0 10px #fff, 0 0 20px #fff, 0 0 30px #e60073, 0 0 40px #e60073;
         }
 
-        /* The container for the star field and drawing area */
+        /* Container for the star field and drawing area */
         #interactive-area {
             position: relative;
             width: 100vw;
             height: 100vh;
             z-index: 1;
-            overflow: hidden; /* Hide overflow to prevent scrollbars */
+            overflow: hidden;
         }
 
-        #star-canvas, #zodiac-canvas, #constellation-canvas {
+        #star-canvas, #zodiac-canvas, #constellation-canvas, #drawingCanvas {
             position: absolute;
             top: 0;
             left: 0;
@@ -55,24 +55,18 @@
 
         /* Drawing Canvas */
         #drawingCanvas {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            cursor: crosshair; /* Make it clear this is a drawing area */
-            z-index: 10; /* Ensure the drawing canvas is above the star field */
+            cursor: crosshair;
+            z-index: 10;
         }
 
-        /* The Dream text */
         .dream-text {
             position: absolute;
             font-family: 'Dancing Script', cursive;
             font-size: 1.5rem;
-            color: #ffd700; /* A golden color for the dreams */
+            color: #ffd700;
             text-shadow: 0 0 5px #fff;
             z-index: 20;
-            opacity: 0; /* Initially hidden */
+            opacity: 0;
             transition: opacity 0.5s ease, font-size 0.5s ease;
         }
 
@@ -82,19 +76,23 @@
         }
 
         .color-picker {
-          -webkit-appearance: none;
-          -moz-appearance: none;
-          appearance: none;
-          width: 40px;
-          height: 40px;
-          border: 2px solid #fff;
-          border-radius: 8px;
-          cursor: pointer;
-          background-color: transparent;
-          padding: 0;
-          box-shadow: 0 2px 5px rgba(0, 0, 0, 0.4);
-          margin: 0 5px;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            width: 40px;
+            height: 40px;
+            border: 2px solid #fff;
+            border-radius: 8px;
+            cursor: pointer;
+            background-color: transparent;
+            padding: 0;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.4);
+            margin: 0 5px;
         }
+
+        /* (Rest of your existing CSS styles) */
+
+        /* ... */
 
         .color-picker::-webkit-color-swatch-wrapper {
           padding: 0;
@@ -110,83 +108,36 @@
           border-radius: 6px;
         }
 
-        .tools {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            display: flex;
-            align-items: center;
-            z-index: 30;
-        }
-
-        /* Tool Buttons */
-        .tools button {
-            padding: 10px 20px;
-            margin: 0 5px;
-            border: none;
-            background-color: #e60073; /* Pink color for tools */
-            color: #fff;
-            font-weight: bold;
-            cursor: pointer;
-            border-radius: 5px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
-            transition: background-color 0.3s ease;
-        }
-
-        .tools button:hover {
-            background-color: #ff3399;
-        }
-
-        /* Shooting Star */
-        @keyframes shooting {
-            0% {
-                transform: translateX(0) translateY(0) rotate(-45deg);
-                opacity: 1;
-            }
-            100% {
-                transform: translateX(300px) translateY(-300px) rotate(-45deg);
-                opacity: 0;
-            }
-        }
-
-        .shooting-star {
-            position: absolute;
-            width: 100px;
-            height: 3px;
-            background: linear-gradient(to right, white, transparent);
-            animation: shooting 2s linear;
-            cursor: pointer;
-        }
-
-        .wish-text {
-            position: absolute;
-            font-family: 'Arial', sans-serif;
-            font-size: 1rem;
-            color: #fff;
-            text-shadow: 0 0 5px #fff;
-            z-index: 20;
-            opacity: 0;
-            transition: opacity 2s ease-in-out;
-        }
-
-        .hidden {
-            display: none;
-        }
-
-        /* Audio Control */
-        .audio-control {
+        /* Add styles for form elements */
+        .input-container {
             position: fixed;
             top: 20px;
-            right: 20px;
-            z-index: 30;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 40;
+            background-color: rgba(0, 0, 0, 0.6);
+            padding: 15px;
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
 
-        /* Share Button */
-        .share-button {
+        .input-container input,
+        .input-container select {
+            margin: 5px 0;
+            padding: 8px;
+            border: 1px solid #fff;
+            border-radius: 5px;
+            background-color: rgba(255, 255, 255, 0.8);
+            color: #333;
+        }
+
+        .input-container button {
             padding: 10px 20px;
-            margin: 0 5px;
+            margin-top: 10px;
             border: none;
-            background-color: #e60073; /* Pink color for tools */
+            background-color: #e60073;
             color: #fff;
             font-weight: bold;
             cursor: pointer;
@@ -195,65 +146,47 @@
             transition: background-color 0.3s ease;
         }
 
-        .share-button:hover {
+        .input-container button:hover {
             background-color: #ff3399;
         }
 
-        .star-glow {
-            box-shadow: 0 0 15px 5px white;
+        /* Styles for specific constellations based on zodiac sign */
+        .constellation-aries {
+            stroke: #ffcc00;
+            stroke-width: 3;
+            filter: drop-shadow(0 0 5px #ffcc00);
         }
 
-        .line-glow {
-            filter: drop-shadow(0 0 5px white);
-        }
+        /* ... (Add similar styles for other zodiac signs with unique colors and shadow) */
 
-        #constellation-canvas {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 5; /* Below the drawing canvas but above other elements */
-        }
-
-        .heart {
-            position: absolute;
-            width: 10px;
-            height: 10px;
-            background: rgba(255, 0, 0, 0.8);
-            transform: rotate(-45deg);
-            opacity: 0;
-        }
-
-        .heart::before,
-        .heart::after {
-            content: '';
-            position: absolute;
-            width: 10px;
-            height: 10px;
-            background: rgba(255, 0, 0, 0.8);
-            border-radius: 50%;
-        }
-
-        .heart::before {
-            top: -5px;
-            left: 0;
-        }
-
-        .heart::after {
-            top: 0;
-            left: 5px;
+        .highlight {
+            stroke: #ff6b6b !important;
+            stroke-width: 4 !important;
+            filter: drop-shadow(0 0 8px #ff6b6b) !important;
         }
     </style>
     <link href="https://fonts.googleapis.com/css2?family=Cedarville+Cursive&family=Dancing+Script&display=swap" rel="stylesheet">
 </head>
 <body>
+    <!-- ... (Your existing HTML) ... -->
     <div class="header-container">
         <div id="countdown"></div>
         <h1>Our Sky of Dreams</h1>
     </div>
 
     <div id="interactive-area">
+        <!-- Form for user input -->
+        <div class="input-container">
+            <input type="date" id="birthDate" required>
+            <select id="birthLocation">
+                <option value="london">London</option>
+                <option value="newyork">New York</option>
+                <option value="sydney">Sydney</option>
+                <option value="tokyo">Tokyo</option>
+                <!-- Add more locations as needed -->
+            </select>
+            <button id="showZodiac">Show My Zodiac</button>
+        </div>
         <canvas id="zodiac-canvas"></canvas>
         <canvas id="star-canvas"></canvas>
         <canvas id="constellation-canvas"></canvas>
@@ -286,7 +219,7 @@
     </div>
 
     <script>
-        // New Year Countdown Timer
+        // ... (Your existing JavaScript code) ...
         const countdownDisplay = document.getElementById("countdown");
 
         function updateCountdown() {
@@ -378,7 +311,160 @@
         // Initialize the stars
         generateStars(100);
 
-        // Modified to draw zodiac constellations
+        // Enhanced Zodiac Constellation Drawing
+        const zodiacData = {
+            Aries: {
+                stars: [[100, 200], [150, 250], [180, 230]],
+                lines: [[0, 1], [1, 2]],
+                styleClass: 'constellation-aries'
+            },
+            Taurus: {
+                stars: [[300, 100], [350, 150], [380, 130], [420, 180]],
+                lines: [[0, 1], [1, 2], [2, 3]],
+                styleClass: 'constellation-taurus'
+            },
+            Gemini: {
+                stars: [[500, 200], [550, 250], [580, 230], [620, 280]],
+                lines: [[0, 1], [1, 2], [2, 3]],
+                styleClass: 'constellation-gemini'
+            },
+            Cancer: {
+                stars: [[100, 400], [150, 350], [180, 370], [220, 320]],
+                lines: [[0, 1], [1, 2], [2, 3]],
+                styleClass: 'constellation-cancer'
+            },
+            Leo: {
+                stars: [[300, 500], [350, 450], [380, 470], [420, 420]],
+                lines: [[0, 1], [1, 2], [2, 3]],
+                styleClass: 'constellation-leo'
+            },
+            Virgo: {
+                stars: [[500, 600], [550, 550], [580, 570], [620, 520]],
+                lines: [[0, 1], [1, 2], [2, 3]],
+                styleClass: 'constellation-virgo'
+            },
+            Libra: {
+                stars: [[700, 200], [750, 250], [780, 230], [820, 280]],
+                lines: [[0, 1], [1, 2], [2, 3]],
+                styleClass: 'constellation-libra'
+            },
+            Scorpio: {
+                stars: [[900, 100], [950, 150], [980, 130], [1020, 180]],
+                lines: [[0, 1], [1, 2], [2, 3]],
+                styleClass: 'constellation-scorpio'
+            },
+            Sagittarius: {
+                stars: [[1100, 200], [1150, 250], [1180, 230], [1220, 280]],
+                lines: [[0, 1], [1, 2], [2, 3]],
+                styleClass: 'constellation-sagittarius'
+            },
+            Capricorn: {
+                stars: [[700, 400], [750, 350], [780, 370], [820, 320]],
+                lines: [[0, 1], [1, 2], [2, 3]],
+                styleClass: 'constellation-capricorn'
+            },
+            Aquarius: {
+                stars: [[900, 500], [950, 450], [980, 470], [1020, 420]],
+                lines: [[0, 1], [1, 2], [2, 3]],
+                styleClass: 'constellation-aquarius'
+            },
+            Pisces: {
+                stars: [[1100, 600], [1150, 550], [1180, 570], [1220, 520]],
+                lines: [[0, 1], [1, 2], [2, 3]],
+                styleClass: 'constellation-pisces'
+            }
+            // Add data for other zodiac signs
+        };
+
+        // This is the Update function for zodiac constellations based on birthdate and location
+        function updateZodiacConstellation(birthDate, location) {
+            const zodiacSign = getZodiacSign(birthDate);
+            drawZodiacConstellation(zodiacSign);
+        }
+
+        // Event listener for the 'Show My Zodiac' button
+        document.getElementById("showZodiac").addEventListener("click", function() {
+            const birthDate = new Date(document.getElementById("birthDate").value);
+            const location = document.getElementById("birthLocation").value;
+            updateZodiacConstellation(birthDate, location);
+        });
+
+        function getZodiacSign(birthDate) {
+            const day = birthDate.getDate();
+            const month = birthDate.getMonth() + 1;
+
+            if ((month === 3 && day >= 21) || (month === 4 && day <= 19)) return 'Aries';
+            if ((month === 4 && day >= 20) || (month === 5 && day <= 20)) return 'Taurus';
+            if ((month === 5 && day >= 21) || (month === 6 && day <= 21)) return 'Gemini';
+            if ((month === 6 && day >= 22) || (month === 7 && day <= 22)) return 'Cancer';
+            if ((month === 7 && day >= 23) || (month === 8 && day <= 22)) return 'Leo';
+            if ((month === 8 && day >= 23) || (month === 9 && day <= 22)) return 'Virgo';
+            if ((month === 9 && day >= 23) || (month === 10 && day <= 23)) return 'Libra';
+            if ((month === 10 && day >= 24) || (month === 11 && day <= 21)) return 'Scorpio';
+            if ((month === 11 && day >= 22) || (month === 12 && day <= 21)) return 'Sagittarius';
+            if ((month === 12 && day >= 22) || (month === 1 && day <= 19)) return 'Capricorn';
+            if ((month === 1 && day >= 20) || (month === 2 && day <= 18)) return 'Aquarius';
+            if ((month === 2 && day >= 19) || (month === 3 && day <= 20)) return 'Pisces';
+            
+            return ''; // Default case
+        }
+
+        function drawZodiacConstellation(zodiacSign) {
+            const canvas = document.getElementById('zodiac-canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            if (zodiacData[zodiacSign]) {
+                const constellation = zodiacData[zodiacSign];
+                const scaleFactor = Math.min(canvas.width, canvas.height) / 500; // Adjust scaling factor
+
+                // Clear any previous zodiac drawing
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                // Draw lines for the constellation
+                ctx.beginPath();
+                ctx.strokeStyle = 'rgba(255, 255, 255, 0.8)';
+                ctx.lineWidth = 3;
+                ctx.shadowBlur = 10;
+                ctx.shadowColor = 'white';
+
+                constellation.lines.forEach(line => {
+                    const start = constellation.stars[line[0]];
+                    const end = constellation.stars[line[1]];
+                    ctx.moveTo(start[0] * scaleFactor, start[1] * scaleFactor);
+                    ctx.lineTo(end[0] * scaleFactor, end[1] * scaleFactor);
+                });
+
+                ctx.stroke();
+                ctx.closePath();
+                ctx.shadowBlur = 0;
+
+                // Highlight effect on hover or when drawing lines
+                canvas.addEventListener('mousemove', (e) => {
+                    const mouseX = e.clientX - canvas.offsetLeft;
+                    const mouseY = e.clientY - canvas.offsetTop;
+
+                    let isNearConstellation = constellation.stars.some(star => {
+                        const [x, y] = [star[0] * scaleFactor, star[1] * scaleFactor];
+                        const distance = Math.sqrt((mouseX - x) ** 2 + (mouseY - y) ** 2);
+                        return distance < 20;
+                    });
+
+                    if (isNearConstellation) {
+                        canvas.classList.add('highlight');
+                    } else {
+                        canvas.classList.remove('highlight');
+                    }
+                });
+
+                // Style the constellation based on the zodiac sign
+                canvas.classList.add(constellation.styleClass);
+
+            }
+        }
+
+        // Function for zodiac constellations based on date and location
         function drawZodiacConstellations() {
             const canvas = document.getElementById('zodiac-canvas');
             const ctx = canvas.getContext('2d');
@@ -452,7 +538,7 @@
             Object.values(constellations).forEach(constellation => {
                 drawConstellation(constellation);
             });
-        }        
+        }
 
         // Call the function to draw zodiac constellations
         drawZodiacConstellations();
@@ -629,7 +715,7 @@
         function highlightLines(clickedStar, connectedStars) {
             connectedStars.forEach(star => {
                 const lineId = `line-${clickedStar.x}-${clickedStar.y}-${star.x}-${star.y}`;
-                const lineId2 = `line-${star.x}-${star.y}-${clickedStar.x}-${clickedStar.y}`;
+                            const lineId2 = `line-${star.x}-${star.y}-${clickedStar.x}-${clickedStar.y}`;
                 const lineElement = document.getElementById(lineId) || document.getElementById(lineId2);
                 if (lineElement) {
                     lineElement.classList.add('line-glow');
@@ -758,7 +844,7 @@
                     wishText.style.left = `${x}px`; // Position based on star's position
                     wishText.style.top = `${y}px`;  // Position based on star's position
                     wishText.textContent = secretWish;
-                                        document.getElementById('interactive-area').appendChild(wishText);
+                    document.getElementById('interactive-area').appendChild(wishText);
 
                     // Fade out the wish text after a few seconds
                     setTimeout(() => {
